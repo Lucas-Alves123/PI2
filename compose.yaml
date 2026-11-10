@@ -1,0 +1,36 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-rotavital}
+      POSTGRES_USER: ${DB_USER:-rotavital}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:?crie o arquivo .env a partir do .env.example}
+    volumes:
+      - dados-rotavital:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
+  app:
+    build: .
+    image: rotavital:local
+    restart: unless-stopped
+    environment:
+      DB_URL: jdbc:postgresql://db:5432/${DB_NAME:-rotavital}
+      DB_USER: ${DB_USER:-rotavital}
+      DB_PASSWORD: ${DB_PASSWORD}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:-admin123}
+      TEMP_MIN: ${TEMP_MIN:-2.0}
+      TEMP_MAX: ${TEMP_MAX:-6.0}
+    ports:
+      - "${APP_PORT:-8080}:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  dados-rotavital:
+

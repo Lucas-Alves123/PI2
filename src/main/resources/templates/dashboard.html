@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Rota Vital — Painel Geral</title>
+  <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <span class="logo-icon">🩸</span>
+    <span>Rota Vital</span>
+  </div>
+  <nav>
+    <a href="/" class="active">📊 Dashboard</a>
+    <a href="/hospitais">🏥 Hospitais</a>
+    <a href="/estoque">📦 Estoque</a>
+    <a href="/requisicoes">📝 Solicitações</a>
+    <a href="/expedicao">🚚 Expedição</a>
+    <a href="/telemetria">🌡️ Telemetria</a>
+  </nav>
+</aside>
+
+<main class="content">
+  <header class="topbar">
+    <h1>Visão Geral da Logística de Hemocomponentes</h1>
+    <div class="user-badge">Operador Ativo: admin</div>
+  </header>
+
+  <div class="cards-grid">
+    <div class="card">
+      <div class="title">Total de Bolsas</div>
+      <div class="value" th:text="${totalBolsas}">0</div>
+    </div>
+    <div class="card success">
+      <div class="title">Bolsas Disponíveis</div>
+      <div class="value" th:text="${bolsasDisponiveis}">0</div>
+    </div>
+    <div class="card warning">
+      <div class="title">Bolsas Reservadas</div>
+      <div class="value" th:text="${bolsasReservadas}">0</div>
+    </div>
+    <div class="card warning">
+      <div class="title">Vencem em até 7 dias</div>
+      <div class="value" th:text="${bolsasProximas}">0</div>
+    </div>
+    <div class="card danger">
+      <div class="title">Bolsas Vencidas</div>
+      <div class="value" th:text="${bolsasVencidas}">0</div>
+    </div>
+  </div>
+
+  <div class="cards-grid">
+    <div class="card">
+      <div class="title">Solicitações Pendentes</div>
+      <div class="value" th:text="${reqPendentes}">0</div>
+    </div>
+    <div class="card success">
+      <div class="title">Solicitações Atendidas</div>
+      <div class="value" th:text="${reqAtendidas}">0</div>
+    </div>
+    <div class="card">
+      <div class="title">Em Expedição / Trânsito</div>
+      <div class="value" th:text="${reqEmExpedicao}">0</div>
+    </div>
+    <div class="card danger">
+      <div class="title">Alertas de Temperatura</div>
+      <div class="value" th:text="${alertasAtivos}">0</div>
+    </div>
+  </div>
+
+  <h2 style="margin-top: 30px; font-size: 1.2rem;">Últimas Solicitações Hospitalares</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Hospital ID</th>
+        <th>Tipo ABO/Rh</th>
+        <th>Componente</th>
+        <th>Qtd</th>
+        <th>Urgência</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="r : ${ultimasRequisicoes}">
+        <td th:text="${r.id}"></td>
+        <td th:text="${r.hospitalId}"></td>
+        <td><strong th:text="${r.aboSolicitado + (r.rhSolicitado.name() == 'POSITIVO' ? '+' : '-')}"></strong></td>
+        <td th:text="${r.componente}"></td>
+        <td th:text="${r.quantidade}"></td>
+        <td th:text="${r.urgencia}"></td>
+        <td><span th:class="'badge badge-' + ${#strings.toLowerCase(r.status)}" th:text="${r.status}"></span></td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(ultimasRequisicoes)}">
+        <td colspan="7" style="text-align: center; color: #888;">Nenhuma solicitação recente no momento.</td>
+      </tr>
+    </tbody>
+  </table>
+
+  <h2 style="margin-top: 30px; font-size: 1.2rem;">Alertas e Notificações Recentes</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Tipo</th>
+        <th>Título</th>
+        <th>Mensagem</th>
+        <th>Horário</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="n : ${notificacoesRecentes}">
+        <td><span class="badge badge-alerta" th:text="${n.tipo}"></span></td>
+        <td th:text="${n.titulo}"></td>
+        <td th:text="${n.mensagem}"></td>
+        <td th:text="${#temporals.format(n.criadaEm, 'dd/MM/yyyy HH:mm')}"></td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(notificacoesRecentes)}">
+        <td colspan="4" style="text-align: center; color: #888;">Nenhuma notificação registrada.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</main>
+
+</body>
+</html>
+

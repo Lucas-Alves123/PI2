@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Rota Vital — Expedição</title>
+  <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <span class="logo-icon">🩸</span>
+    <span>Rota Vital</span>
+  </div>
+  <nav>
+    <a href="/">📊 Dashboard</a>
+    <a href="/hospitais">🏥 Hospitais</a>
+    <a href="/estoque">📦 Estoque</a>
+    <a href="/requisicoes">📝 Solicitações</a>
+    <a href="/expedicao" class="active">🚚 Expedição</a>
+    <a href="/telemetria">🌡️ Telemetria</a>
+  </nav>
+</aside>
+
+<main class="content">
+  <header class="topbar">
+    <h1>Gestão de Expedições e Entregas</h1>
+  </header>
+
+  <div th:if="${not #lists.isEmpty(prontasParaExpedir)}">
+    <h2 style="font-size: 1.1rem; margin-bottom: 10px;">Requisições Prontas para Expedir</h2>
+    <form class="compact-form" action="/expedicao/gerar-guia" method="post">
+      <div class="form-group">
+        <label>Requisição Atendida</label>
+        <select name="requisicaoId">
+          <option th:each="r : ${prontasParaExpedir}" th:value="${r.id}"
+                  th:text="'REQ #' + ${r.id} + ' — ' + ${r.aboSolicitado} + ' ' + ${r.componente} + ' (Hospital #' + ${r.hospitalId} + ')'"></option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>Responsável pelo Transporte</label>
+        <input type="text" name="responsavel" value="Motorista Sintético 01">
+      </div>
+      <button type="submit" class="btn-primary">Gerar Guia de Expedição</button>
+    </form>
+  </div>
+
+  <h2 style="margin-top: 25px; font-size: 1.1rem;">Guias de Expedição</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>Nº Guia</th>
+        <th>Requisição</th>
+        <th>Responsável</th>
+        <th>Saída</th>
+        <th>Entrega</th>
+        <th>Status</th>
+        <th>Ações</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="g : ${guias}">
+        <td th:text="${g.numero}"></td>
+        <td th:text="'REQ #' + ${g.requisicaoId}"></td>
+        <td th:text="${g.responsavel}"></td>
+        <td th:text="${g.saidaEm != null ? #temporals.format(g.saidaEm, 'dd/MM HH:mm') : '—'}"></td>
+        <td th:text="${g.entregaEm != null ? #temporals.format(g.entregaEm, 'dd/MM HH:mm') : '—'}"></td>
+        <td><span th:class="'badge badge-' + ${#strings.toLowerCase(g.status)}" th:text="${g.status}"></span></td>
+        <td>
+          <form th:if="${g.status.name() == 'PREPARANDO'}" th:action="'/expedicao/' + ${g.id} + '/despachar'" method="post" style="display:inline;">
+            <button type="submit" class="btn-primary btn-sm">🚚 Despachar</button>
+          </form>
+          <form th:if="${g.status.name() == 'EM_TRANSITO'}" th:action="'/expedicao/' + ${g.id} + '/entregar'" method="post" style="display:inline;">
+            <button type="submit" class="btn-primary btn-sm" style="background:#15803d;">✅ Confirmar Entrega</button>
+          </form>
+        </td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(guias)}">
+        <td colspan="7" style="text-align:center;color:#888;">Nenhuma guia emitida ainda.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</main>
+
+</body>
+</html>

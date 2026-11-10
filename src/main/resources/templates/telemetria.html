@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Rota Vital — Telemetria</title>
+  <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <span class="logo-icon">🩸</span>
+    <span>Rota Vital</span>
+  </div>
+  <nav>
+    <a href="/">📊 Dashboard</a>
+    <a href="/hospitais">🏥 Hospitais</a>
+    <a href="/estoque">📦 Estoque</a>
+    <a href="/requisicoes">📝 Solicitações</a>
+    <a href="/expedicao">🚚 Expedição</a>
+    <a href="/telemetria" class="active">🌡️ Telemetria</a>
+  </nav>
+</aside>
+
+<main class="content">
+  <header class="topbar">
+    <h1>Monitoramento de Temperatura — Cadeia Fria</h1>
+  </header>
+
+  <div class="card" style="margin-bottom:20px; display:inline-block; min-width:250px;">
+    <div class="title">Faixa Configurada</div>
+    <div style="font-size:1.2rem; font-weight:bold;">
+      <span th:text="${limiteMin}"></span> °C
+      <span style="color:#888;"> até </span>
+      <span th:text="${limiteMax}"></span> °C
+    </div>
+    <p style="font-size:0.8rem; color:#888; margin-top:5px;">Premissa sintética — validar com especialista</p>
+  </div>
+
+  <h2 style="font-size: 1.1rem; margin-bottom: 10px;">Simular Leitura de Telemetria (Dados Sintéticos)</h2>
+  <form class="compact-form" action="/telemetria/simular" method="post">
+    <div class="form-group">
+      <label>ID da Guia</label>
+      <input type="number" name="guiaId" min="1" value="1" required>
+    </div>
+    <div class="form-group">
+      <label>Temperatura (°C)</label>
+      <input type="number" name="temperatura" step="0.1" value="4.2" required>
+    </div>
+    <div class="form-group">
+      <label>Latitude</label>
+      <input type="number" name="latitude" step="0.0000001" value="-8.0578">
+    </div>
+    <div class="form-group">
+      <label>Longitude</label>
+      <input type="number" name="longitude" step="0.0000001" value="-34.8829">
+    </div>
+    <button type="submit" class="btn-primary">Registrar Leitura Sintética</button>
+  </form>
+
+  <h2 style="margin-top: 25px; font-size: 1.1rem;">Últimas 20 Leituras</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Guia</th>
+        <th>Temperatura</th>
+        <th>Latitude</th>
+        <th>Longitude</th>
+        <th>Horário</th>
+        <th>Alerta?</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="l : ${leituras}">
+        <td th:text="${l.id}"></td>
+        <td th:text="${l.guiaId != null ? '#' + l.guiaId : '—'}"></td>
+        <td>
+          <strong th:text="${l.temperatura + ' °C'}"
+                  th:style="${l.alerta} ? 'color:#dc2626;' : 'color:#15803d;'"></strong>
+        </td>
+        <td th:text="${l.latitude}"></td>
+        <td th:text="${l.longitude}"></td>
+        <td th:text="${#temporals.format(l.lidoEm, 'dd/MM/yyyy HH:mm:ss')}"></td>
+        <td>
+          <span th:if="${l.alerta}" class="badge badge-alerta">⚠️ Fora da faixa</span>
+          <span th:if="${!l.alerta}" class="badge badge-disponivel">OK</span>
+        </td>
+      </tr>
+      <tr th:if="${#lists.isEmpty(leituras)}">
+        <td colspan="7" style="text-align:center;color:#888;">Nenhuma leitura registrada ainda. Simule uma acima.</td>
+      </tr>
+    </tbody>
+  </table>
+
+</main>
+
+</body>
+</html>

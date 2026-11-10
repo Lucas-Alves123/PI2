@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <title>Rota Vital — Hospitais</title>
+  <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <span class="logo-icon">🩸</span>
+    <span>Rota Vital</span>
+  </div>
+  <nav>
+    <a href="/">📊 Dashboard</a>
+    <a href="/hospitais" class="active">🏥 Hospitais</a>
+    <a href="/estoque">📦 Estoque</a>
+    <a href="/requisicoes">📝 Solicitações</a>
+    <a href="/expedicao">🚚 Expedição</a>
+    <a href="/telemetria">🌡️ Telemetria</a>
+  </nav>
+</aside>
+
+<main class="content">
+  <header class="topbar">
+    <h1>Gestão de Hospitais Parceiros</h1>
+  </header>
+
+  <h2 style="font-size: 1.1rem; margin-bottom: 10px;">Cadastrar Novo Hospital Sintético</h2>
+  <form class="compact-form" action="/hospitais/cadastrar" method="post">
+    <div class="form-group">
+      <label>Nome do Hospital</label>
+      <input type="text" name="nome" placeholder="Hospital Fictício Central" required>
+    </div>
+    <div class="form-group">
+      <label>CNPJ Fictício</label>
+      <input type="text" name="cnpj" placeholder="00.000.999/0001-99" required>
+    </div>
+    <div class="form-group">
+      <label>Endereço</label>
+      <input type="text" name="logradouro" placeholder="Rua Exemplo, 100">
+    </div>
+    <div class="form-group">
+      <label>Cidade</label>
+      <input type="text" name="cidade" placeholder="Recife">
+    </div>
+    <div class="form-group">
+      <label>UF</label>
+      <input type="text" name="estado" maxlength="2" placeholder="PE">
+    </div>
+    <div class="form-group">
+      <label>Telefone</label>
+      <input type="text" name="telefone" placeholder="(81) 3000-0000">
+    </div>
+    <div class="form-group">
+      <label>E-mail</label>
+      <input type="email" name="email" placeholder="contato@hospital.local">
+    </div>
+    <div class="form-group">
+      <label>Responsável</label>
+      <input type="text" name="responsavel" placeholder="Dra. Fulana de Tal">
+    </div>
+    <button type="submit" class="btn-primary">Cadastrar Hospital</button>
+  </form>
+
+  <h2 style="margin-top: 25px; font-size: 1.1rem;">Hospitais Cadastrados</h2>
+  <table class="data-table">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Nome</th>
+        <th>Cidade / UF</th>
+        <th>Responsável</th>
+        <th>Telefone</th>
+        <th>Situação</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr th:each="h : ${hospitais}">
+        <td th:text="${h.id}"></td>
+        <td th:text="${h.nome}"></td>
+        <td th:text="${h.cidade + '/' + h.estado}"></td>
+        <td th:text="${h.responsavel}"></td>
+        <td th:text="${h.telefone}"></td>
+        <td>
+          <span th:class="${h.ativo} ? 'badge badge-disponivel' : 'badge badge-cancelada'"
+                th:text="${h.ativo} ? 'Ativo' : 'Inativo'"></span>
+        </td>
+      </tr>
+    </tbody>
+  </table>
+
+</main>
+
+</body>
+</html>
