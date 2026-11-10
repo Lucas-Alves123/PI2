@@ -142,3 +142,4 @@ for ws in [ws1, ws2]:
 excel_path = r"C:\Users\lucas.luna\Desktop\Github - Projetos\PI2\docs\arquitetura\orcamento.xlsx"
 wb.save(excel_path)
 print("Planilha Excel criada com sucesso em:", excel_path)
+

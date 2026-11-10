@@ -72,3 +72,4 @@
    - **Resposta:** Através da invariante do agregado protegida com constraint única no banco de dados na tabela de alocação (`UNIQUE(bolsa_id)`) associada a transações com isolamento no Spring.
 3. *"De onde vieram os limites de temperatura da telemetria?"*
    - **Resposta:** São dados sintéticos e premissas configuráveis (`application.yml`), com faixas sintéticas padrão de 2°C a 6°C que foram marcadas na documentação como pendentes de validação clínica.
+

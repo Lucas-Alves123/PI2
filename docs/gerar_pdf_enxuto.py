@@ -282,3 +282,4 @@ cmd = [
 ]
 subprocess.run(cmd, check=True)
 print("Novo PDF gerado.")
+
