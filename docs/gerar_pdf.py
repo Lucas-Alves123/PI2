@@ -191,3 +191,4 @@ if os.path.exists(pdf_file):
     print("PDF GERADO COM SUCESSO:", pdf_file, "Tamanho:", os.path.getsize(pdf_file), "bytes")
 else:
     print("Erro ao gerar PDF:", res.stderr)
+
