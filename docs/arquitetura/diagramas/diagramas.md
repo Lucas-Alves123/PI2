@@ -206,3 +206,4 @@ flowchart TD
     TelPool --> DB_Replica[("PostgreSQL Read Replica (Telemetria/Leituras)")]
     DB_Master -. "Replicação contínua" .-> DB_Replica
 ```
+
