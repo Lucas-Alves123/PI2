@@ -25,3 +25,4 @@ Funcionalidade: Alocar bolsas compatíveis para uma requisição hospitalar
     Quando uma requisição for registrada solicitando 3 bolsas O+ de CH
     Então apenas 1 bolsa deve ser alocada
     E o status da requisição deve ser "PARCIALMENTE_ATENDIDA"
+

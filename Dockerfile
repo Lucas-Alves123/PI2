@@ -27,3 +27,4 @@ HEALTHCHECK --interval=15s --timeout=5s --retries=5 \
   CMD wget -qO- http://localhost:8080/actuator/health || exit 1
 
 ENTRYPOINT ["java", "-jar", "rotavital.jar"]
+

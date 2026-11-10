@@ -109,3 +109,4 @@ public class AlocacaoSteps {
         assertThat(ultimaRequisicao.getStatus().name()).isEqualTo(statusEsperado);
     }
 }
+

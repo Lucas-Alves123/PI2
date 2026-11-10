@@ -108,3 +108,4 @@
 6. Recalcule o custo por pedido com a fórmula: `Total mensal ÷ pedidos/dia ÷ 30`
 
 > **Lembrete:** Preços on-demand são o maior valor possível (sem desconto de Reserved Instances ou Savings Plans). Com reserva de 1 ano, o custo pode ser ~30% menor.
+

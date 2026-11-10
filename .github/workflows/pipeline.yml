@@ -63,3 +63,4 @@ jobs:
         run: |
           sleep 30
           curl -sSf "${{ secrets.RENDER_APP_URL }}/actuator/health" | grep '"status":"UP"'
+

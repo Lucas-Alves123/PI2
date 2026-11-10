@@ -177,3 +177,4 @@ Utilizamos o **Antigravity** (assistente de programação com IA da Google DeepM
 | Documentação | Todos os .md em docs/arquitetura/ | Revisamos e ajustamos com base nas aulas |
 
 > **Nota:** Preços de nuvem na seção de orçamento foram indicados como pendentes de validação — a IA não inventou valores; a equipe deve consultar os calculadores oficiais e preencher com data de consulta.
+

@@ -69,3 +69,4 @@ class RequisicaoTest {
         ).hasMessageContaining("Hospital é obrigatório");
     }
 }
+
