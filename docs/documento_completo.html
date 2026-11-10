@@ -1,0 +1,2251 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Rota Vital — Planejamento da Remodelagem</title>
+<style>
+  @page {
+    size: A4;
+    margin: 20mm 15mm 20mm 15mm;
+    @bottom-right {
+      content: counter(page);
+    }
+  }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #1e293b;
+    line-height: 1.45;
+    font-size: 10.5pt;
+  }
+  .capa {
+    page-break-after: always;
+    text-align: center;
+    padding-top: 60px;
+  }
+  .capa h1 {
+    font-size: 26pt;
+    color: #0f172a;
+    margin-bottom: 5px;
+  }
+  .capa h2 {
+    font-size: 14pt;
+    color: #b91c1c;
+    font-weight: 600;
+    margin-bottom: 30px;
+  }
+  .capa .meta {
+    font-size: 11pt;
+    color: #475569;
+    margin-bottom: 40px;
+    line-height: 1.6;
+  }
+  .capa .squad {
+    margin: 40px auto;
+    width: 75%;
+    border-collapse: collapse;
+    font-size: 10pt;
+  }
+  .capa .squad th, .capa .squad td {
+    border: 1px solid #cbd5e1;
+    padding: 8px 12px;
+    text-align: left;
+  }
+  .capa .squad th {
+    background-color: #f1f5f9;
+  }
+  .section-break {
+    page-break-before: always;
+  }
+  h1 { font-size: 16pt; color: #0f172a; border-bottom: 2px solid #0284c7; padding-bottom: 4px; margin-top: 20px; }
+  h2 { font-size: 13pt; color: #1e293b; margin-top: 16px; }
+  h3 { font-size: 11pt; color: #334155; margin-top: 12px; }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+    font-size: 9pt;
+  }
+  table th, table td {
+    border: 1px solid #cbd5e1;
+    padding: 6px 8px;
+    text-align: left;
+  }
+  table th {
+    background-color: #f8fafc;
+    font-weight: 600;
+  }
+  code {
+    background-color: #f1f5f9;
+    padding: 2px 4px;
+    border-radius: 3px;
+    font-family: Consolas, Monaco, monospace;
+    font-size: 9pt;
+  }
+  pre {
+    background-color: #0f172a;
+    color: #f8fafc;
+    padding: 10px;
+    border-radius: 5px;
+    overflow-x: auto;
+    font-size: 8.5pt;
+    line-height: 1.3;
+  }
+  pre code {
+    background: none;
+    color: inherit;
+    padding: 0;
+  }
+  blockquote {
+    border-left: 3px solid #0284c7;
+    background-color: #f0f9ff;
+    padding: 8px 12px;
+    margin: 10px 0;
+    font-size: 9.5pt;
+  }
+</style>
+</head>
+<body>
+
+<div class="capa">
+  <div style="font-size: 40pt; margin-bottom: 10px;">🩸</div>
+  <h1>PROJETO ROTA VITAL</h1>
+  <h2>Sistema de Gestão Logística de Hemocomponentes</h2>
+  <div class="meta">
+    <strong>CESAR School · Análise e Desenvolvimento de Sistemas</strong><br>
+    Disciplina: Infraestrutura de Software (2026.2)<br>
+    Trabalho U2 — Parte 2: Planejamento da Remodelagem Arquitetural<br>
+    Repositório: <a href="https://github.com/Lucas-Alves123/PI2">github.com/Lucas-Alves123/PI2</a>
+  </div>
+
+  <table class="squad">
+    <thead>
+      <tr>
+        <th>Integrante</th>
+        <th>Papel no Squad</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr><td>Gabriel Farias</td><td>Engenharia de Software</td></tr>
+      <tr><td>Gabriel Nogueira</td><td>Infraestrutura e Banco de Dados</td></tr>
+      <tr><td>Lucas Mateus (@Lucas-Alves123)</td><td>Arquiteto de Software & Full-Stack</td></tr>
+      <tr><td>Mirella Emily</td><td>Qualidade de Software & BDD</td></tr>
+      <tr><td>Myllena Cristiane</td><td>Análise de Requisitos & Domínio</td></tr>
+    </tbody>
+  </table>
+</div>
+<div class="section-break">
+<h1>Domínio — Rota Vital</h1>
+<p><strong>Projeto:</strong> Rota Vital — Sistema de Gestão Logística de Hemocomponentes<br />
+<strong>Disciplina:</strong> Infraestrutura de Software · CESAR School · ADS · 2026.2<br />
+<strong>Trabalho:</strong> U2 · Parte 2 · Seção A — Remodelagem do Domínio com DDD</p>
+<hr />
+<h2>O que é o Rota Vital</h2>
+<p>O Rota Vital é um sistema de gestão logística de hemocomponentes. Ele organiza o controle de estoque de bolsas de sangue, o atendimento de solicitações hospitalares, a alocação de bolsas compatíveis e o acompanhamento da expedição e do transporte em cadeia fria.</p>
+<p>O sistema permite que hospitais registrem solicitações de hemocomponentes, que o estoque seja consultado e que todo o processo — desde a separação até a entrega — seja acompanhado com rastreabilidade.</p>
+<p><strong>Todos os dados são sintéticos e fictícios.</strong></p>
+<hr />
+<h2>Subdomínios</h2>
+<p>O domínio do Rota Vital foi dividido em sete subdomínios, classificados em três categorias: Core, Suporte e Genérico.</p>
+<h3>Core — Subdomínios que diferenciam o Rota Vital</h3>
+<p>São os subdomínios que contêm as regras de negócio exclusivas e estratégicas do sistema. Sem eles, o Rota Vital não existe.</p>
+<h4>1. Requisição e Alocação</h4>
+<p><strong>Responsabilidade:</strong> Receber solicitações de hemocomponentes dos hospitais, verificar a compatibilidade ABO/Rh, aplicar a regra de prioridade FEFO (First Expired, First Out) e alocar as bolsas disponíveis para cada requisição.</p>
+<p><strong>Justificativa:</strong> É o coração do sistema. Nenhum outro software de logística de hemocomponentes toma as mesmas decisões — compatibilidade sanguínea, FEFO e controle de reserva simultânea são regras exclusivas deste domínio.</p>
+<hr />
+<h4>2. Estoque de Hemocomponentes</h4>
+<p><strong>Responsabilidade:</strong> Controlar o ciclo de vida das bolsas de sangue — entrada, validade, localização, disponibilidade e descarte. Garantir que bolsas vencidas não sejam alocadas.</p>
+<p><strong>Justificativa:</strong> O controle de estoque de hemocomponentes tem regras próprias: vencimento crítico, rastreabilidade por bolsa individual e restrições de uso. Não é um estoque genérico.</p>
+<hr />
+<h4>3. Expedição e Cadeia Fria</h4>
+<p><strong>Responsabilidade:</strong> Organizar guias de expedição, registrar rotas, acompanhar entregas e monitorar as condições de temperatura durante o transporte.</p>
+<p><strong>Justificativa:</strong> A cadeia fria é requisito regulatório no transporte de hemocomponentes. A lógica de emissão de guias, controle de temperatura e registro de entrega é específica deste domínio.</p>
+<hr />
+<h3>Suporte — Subdomínios que apoiam os contextos core</h3>
+<p>São importantes para o funcionamento do sistema, mas não são o diferencial competitivo.</p>
+<h4>4. Hospitais</h4>
+<p><strong>Responsabilidade:</strong> Cadastrar e manter informações dos hospitais e unidades solicitantes. Fornecer dados de identidade para os outros contextos.</p>
+<p><strong>Justificativa:</strong> Sem o cadastro de hospitais, nenhuma solicitação pode ser feita. Mas as regras de cadastro são simples e não exigem lógica especializada.</p>
+<hr />
+<h4>5. Telemetria</h4>
+<p><strong>Responsabilidade:</strong> Registrar leituras de temperatura, localização GPS e dados de veículos durante o transporte. Gerar alertas quando os valores saem da faixa configurada.</p>
+<p><strong>Justificativa:</strong> Apoia o contexto de Expedição e Cadeia Fria, mas pode ser separado fisicamente em um serviço independente — especialmente em cenários de alto volume, onde o número de leituras cresce muito mais rápido do que o número de requisições.</p>
+<hr />
+<h3>Genérico — Subdomínios que podem ser comprados ou reutilizados</h3>
+<p>São subdomínios cujas soluções já existem no mercado e não precisam ser desenvolvidas do zero.</p>
+<h4>6. Notificação</h4>
+<p><strong>Responsabilidade:</strong> Enviar alertas e notificações internas — nova solicitação, bolsa próxima do vencimento, expedição iniciada, entrega concluída, temperatura fora dos limites.</p>
+<p><strong>Justificativa:</strong> O mecanismo de envio de notificações (e-mail, SMS, push) é genérico. O que é específico do Rota Vital é <em>quando</em> notificar — e essa lógica pertence aos outros contextos.</p>
+<hr />
+<h4>7. Identidade e Acesso</h4>
+<p><strong>Responsabilidade:</strong> Gerenciar usuários, autenticação, perfis e permissões. Controlar quem pode acessar cada parte do sistema.</p>
+<p><strong>Justificativa:</strong> Autenticação e autorização são resolvidos por soluções de mercado (Spring Security, OAuth2, Keycloak). Não há lógica de negócio exclusiva aqui.</p>
+<hr />
+<h2>Bounded Contexts</h2>
+<p>Cada subdomínio é implementado como um Bounded Context independente, com seu próprio modelo de domínio e linguagem ubíqua.</p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Bounded Context</th>
+<th>Tipo</th>
+<th>Responsabilidade em uma frase</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Requisição</strong></td>
+<td>Core</td>
+<td>Recebe e gerencia solicitações de hemocomponentes dos hospitais</td>
+</tr>
+<tr>
+<td>2</td>
+<td><strong>Alocação</strong></td>
+<td>Core</td>
+<td>Verifica compatibilidade, aplica FEFO e reserva bolsas para cada requisição</td>
+</tr>
+<tr>
+<td>3</td>
+<td><strong>Estoque</strong></td>
+<td>Core</td>
+<td>Controla o ciclo de vida das bolsas desde a entrada até o descarte</td>
+</tr>
+<tr>
+<td>4</td>
+<td><strong>Expedição</strong></td>
+<td>Core</td>
+<td>Emite guias, organiza o transporte e registra a entrega</td>
+</tr>
+<tr>
+<td>5</td>
+<td><strong>Hospitais</strong></td>
+<td>Suporte</td>
+<td>Cadastra e mantém hospitais e unidades solicitantes</td>
+</tr>
+<tr>
+<td>6</td>
+<td><strong>Telemetria</strong></td>
+<td>Suporte</td>
+<td>Registra leituras de temperatura e localização durante o transporte</td>
+</tr>
+<tr>
+<td>7</td>
+<td><strong>Notificação</strong></td>
+<td>Genérico</td>
+<td>Envia alertas e avisos para os usuários do sistema</td>
+</tr>
+<tr>
+<td>8</td>
+<td><strong>Identidade</strong></td>
+<td>Genérico</td>
+<td>Gerencia usuários, autenticação e permissões de acesso</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota:</strong> Os contextos de Requisição e Alocação são separados na classificação de responsabilidade, mas na implementação atual (monolito modular) compartilham o mesmo módulo. A separação física em serviços independentes é descrita na projeção de microsserviços.</p>
+</blockquote>
+<hr />
+<h2>Referências</h2>
+<ul>
+<li>EVANS, E. <em>Domain-Driven Design</em>. Addison-Wesley, 2003.</li>
+<li>VERNON, V. <em>Implementing Domain-Driven Design</em>. Addison-Wesley, 2013.</li>
+<li>Slides das aulas 006 e 007 — Infraestrutura de Software · CESAR School · 2026.2</li>
+</ul>
+</div>
+<div class="section-break">
+<h1>Glossário — Linguagem Ubíqua do Rota Vital</h1>
+<p><strong>Projeto:</strong> Rota Vital<br />
+<strong>Disciplina:</strong> Infraestrutura de Software · CESAR School · ADS · 2026.2<br />
+<strong>Trabalho:</strong> U2 · Parte 2 · Seção A — Glossário</p>
+<hr />
+<h2>Introdução</h2>
+<p>A linguagem ubíqua é o vocabulário compartilhado entre desenvolvedores e especialistas do domínio. No Rota Vital, ela garante que termos como "bolsa" e "requisição" signifiquem a mesma coisa para todos — ou que, quando um termo tem significados diferentes em contextos distintos, essa diferença seja explicitamente documentada.</p>
+<p><strong>Atenção:</strong> Alguns termos têm significados diferentes dependendo do contexto. Esses casos são identificados com o símbolo ⚠️.</p>
+<hr />
+<h2>Termos Gerais</h2>
+<h3>Hospital</h3>
+<p><strong>Definição:</strong> Instituição de saúde cadastrada no Rota Vital que pode solicitar hemocomponentes para atender suas necessidades clínicas.<br />
+<strong>Contexto:</strong> Hospitais<br />
+<strong>Atributos relevantes:</strong> nome, CNPJ (fictício), endereço, cidade, estado, responsável, status (ativo/inativo).<br />
+<strong>Usado em:</strong> Hospitais, Requisição</p>
+<hr />
+<h3>Unidade Solicitante</h3>
+<p><strong>Definição:</strong> Setor ou unidade interna de um hospital habilitada a realizar solicitações de hemocomponentes. Exemplos: UTI, Pronto-Socorro, Bloco Cirúrgico.<br />
+<strong>Contexto:</strong> Hospitais<br />
+<strong>Nota:</strong> Um hospital pode ter várias unidades solicitantes. A unidade identifica a origem da requisição dentro do hospital.<br />
+<strong>Usado em:</strong> Hospitais, Requisição</p>
+<hr />
+<h3>Requisição</h3>
+<p><strong>Definição:</strong> Solicitação formal registrada por um hospital para receber uma quantidade específica de hemocomponentes com determinado tipo sanguíneo e nível de urgência.<br />
+<strong>Contexto:</strong> Requisição<br />
+<strong>Ciclo de status:</strong> Pendente → Em análise → Parcialmente atendida → Atendida → Em expedição → Concluída / Cancelada<br />
+<strong>Usado em:</strong> Requisição, Alocação, Expedição</p>
+<hr />
+<h3>Alocação</h3>
+<p><strong>Definição:</strong> Ato de reservar uma bolsa compatível para uma requisição específica. Uma alocação registra qual bolsa foi reservada, quando e para qual requisição.<br />
+<strong>Contexto:</strong> Alocação<br />
+<strong>Invariante:</strong> Uma bolsa só pode estar alocada em uma requisição ativa por vez.<br />
+<strong>Usado em:</strong> Alocação, Estoque</p>
+<hr />
+<h3>Compatibilidade</h3>
+<p><strong>Definição:</strong> Regra que determina se uma bolsa pode ser transfundida para o receptor considerando os tipos sanguíneos ABO e Rh. A compatibilidade varia conforme o componente (concentrado de hemácias, plaquetas, plasma, etc.).<br />
+<strong>Contexto:</strong> Alocação<br />
+<strong>Nota:</strong> A matriz de compatibilidade utilizada neste sistema é sintética e deve ser validada por profissional habilitado antes de qualquer uso real.<br />
+<strong>Usado em:</strong> Alocação</p>
+<hr />
+<h3>Tipo Sanguíneo</h3>
+<p><strong>Definição:</strong> Classificação do sangue segundo os sistemas ABO (A, B, AB, O) e Rh (positivo ou negativo). Exemplo: "O negativo", "AB positivo".<br />
+<strong>Contexto:</strong> Alocação, Estoque<br />
+<strong>Implementação:</strong> Value Object com atributos <code>abo</code> (enum: A, B, AB, O) e <code>rh</code> (enum: POSITIVO, NEGATIVO).<br />
+<strong>Usado em:</strong> Alocação, Estoque, Requisição</p>
+<hr />
+<h3>FEFO (First Expired, First Out)</h3>
+<p><strong>Definição:</strong> Regra de priorização que determina que, entre as bolsas compatíveis disponíveis, a que tem a data de validade mais próxima deve ser alocada primeiro. Minimiza o descarte por vencimento.<br />
+<strong>Contexto:</strong> Alocação<br />
+<strong>Analogia:</strong> Similar ao FIFO (First In, First Out) dos estoques convencionais, mas baseado em validade, não em ordem de entrada.<br />
+<strong>Usado em:</strong> Alocação</p>
+<hr />
+<h3>⚠️ Bolsa (Estoque)</h3>
+<p><strong>Definição no contexto Estoque:</strong> Item individual armazenado no banco de sangue. Identificada por um código único, possui tipo sanguíneo, tipo de hemocomponente, data de coleta, data de validade, localização física e status (Disponível, Reservada, Em separação, Em expedição, Entregue, Descartada, Vencida).<br />
+<strong>Contexto:</strong> Estoque<br />
+<strong>Regra:</strong> Bolsas vencidas não podem ser alocadas. O sistema verifica a validade automaticamente.</p>
+<hr />
+<h3>⚠️ Bolsa (Expedição)</h3>
+<p><strong>Definição no contexto Expedição:</strong> Volume transportado vinculado a uma guia de expedição. Neste contexto, o que importa não é o conteúdo interno da bolsa, mas sua associação com a guia, o veículo e as condições de temperatura registradas durante o transporte.<br />
+<strong>Contexto:</strong> Expedição<br />
+<strong>Diferença crítica:</strong> No Estoque, "bolsa" é um item de estoque com validade e localização. Na Expedição, "bolsa" é um volume em trânsito, monitorado pela cadeia fria.</p>
+<blockquote>
+<p>⚠️ <strong>Atenção:</strong> "Bolsa" tem significados diferentes em Estoque e Expedição. Os dois modelos não devem ser misturados. Um controller de Expedição não deve acessar diretamente o repositório de bolsas do Estoque.</p>
+</blockquote>
+<hr />
+<h3>Hemocomponente</h3>
+<p><strong>Definição:</strong> Produto derivado do processamento do sangue total. Os principais tipos são: Concentrado de Hemácias (CH), Plasma Fresco Congelado (PFC), Concentrado de Plaquetas (CP) e Crioprecipitado.<br />
+<strong>Contexto:</strong> Estoque, Requisição<br />
+<strong>Nota:</strong> A compatibilidade ABO/Rh varia conforme o hemocomponente.<br />
+<strong>Usado em:</strong> Estoque, Requisição, Alocação</p>
+<hr />
+<h3>Guia de Expedição</h3>
+<p><strong>Definição:</strong> Documento (ou registro digital) que formaliza o envio de bolsas de um banco de sangue para um hospital. Contém as bolsas embarcadas, o veículo, o responsável, a data/hora de saída e o destino.<br />
+<strong>Contexto:</strong> Expedição<br />
+<strong>Usado em:</strong> Expedição, Telemetria</p>
+<hr />
+<h3>Cadeia Fria</h3>
+<p><strong>Definição:</strong> Conjunto de procedimentos e controles que garantem que os hemocomponentes sejam mantidos dentro da faixa de temperatura adequada desde a coleta até a entrega no hospital.<br />
+<strong>Contexto:</strong> Expedição, Telemetria<br />
+<strong>Nota:</strong> Os limites de temperatura são configuráveis no sistema e devem ser definidos pela equipe com base em premissas do domínio. Os valores padrão são sintéticos.<br />
+<strong>Usado em:</strong> Expedição, Telemetria</p>
+<hr />
+<h3>Telemetria</h3>
+<p><strong>Definição:</strong> Registro automático de dados do transporte — temperatura, localização GPS, identificador do veículo e data/hora da leitura. Permite monitorar se a cadeia fria está sendo mantida.<br />
+<strong>Contexto:</strong> Telemetria<br />
+<strong>Usado em:</strong> Telemetria, Expedição</p>
+<hr />
+<h3>Alerta de Temperatura</h3>
+<p><strong>Definição:</strong> Notificação gerada automaticamente quando uma leitura de telemetria indica temperatura fora da faixa configurada para a cadeia fria.<br />
+<strong>Contexto:</strong> Telemetria, Notificação<br />
+<strong>Usado em:</strong> Telemetria, Notificação</p>
+<hr />
+<h2>Resumo — Termos com Duplo Significado</h2>
+<table>
+<thead>
+<tr>
+<th>Termo</th>
+<th>Contexto A</th>
+<th>Significado A</th>
+<th>Contexto B</th>
+<th>Significado B</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Bolsa</strong></td>
+<td>Estoque</td>
+<td>Item armazenado com validade, localização e status</td>
+<td>Expedição</td>
+<td>Volume em trânsito vinculado a uma guia e monitorado por temperatura</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Referências</h2>
+<ul>
+<li>EVANS, E. <em>Domain-Driven Design</em>. Addison-Wesley, 2003.</li>
+<li>VERNON, V. <em>Implementing Domain-Driven Design</em>. Addison-Wesley, 2013.</li>
+</ul>
+</div>
+<div class="section-break">
+<h1>Mapa de Contextos — Rota Vital</h1>
+<p><strong>Projeto:</strong> Rota Vital<br />
+<strong>Disciplina:</strong> Infraestrutura de Software · CESAR School · ADS · 2026.2<br />
+<strong>Trabalho:</strong> U2 · Parte 2 · Seção A — Mapa de Contextos</p>
+<hr />
+<h2>Introdução</h2>
+<p>O mapa de contextos descreve como os Bounded Contexts do Rota Vital se relacionam entre si. Cada relação tem um tipo que define quem depende de quem, como os dados trafegam e quem tem autonomia para mudar o modelo.</p>
+<h3>Tipos de relação utilizados</h3>
+<table>
+<thead>
+<tr>
+<th>Tipo</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Cliente-Fornecedor (C/F)</strong></td>
+<td>O contexto upstream (fornecedor) provê dados; o downstream (cliente) os consome. O fornecedor tem autonomia sobre seu modelo.</td>
+</tr>
+<tr>
+<td><strong>Conformista (C)</strong></td>
+<td>O contexto downstream adota o modelo do upstream sem adaptação.</td>
+</tr>
+<tr>
+<td><strong>Camada Anticorrupção (ACL)</strong></td>
+<td>O contexto downstream traduz o modelo do upstream para seu próprio modelo, protegendo sua linguagem ubíqua.</td>
+</tr>
+<tr>
+<td><strong>Publicador-Assinante (Pub/Sub)</strong></td>
+<td>O contexto publica eventos de domínio; outros contextos assinam e reagem a eles.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Diagrama do Mapa de Contextos</h2>
+<pre><code>                    ┌─────────────────────────────────────────────────┐
+                    │          NÚCLEO DO SISTEMA (Core)                │
+                    │                                                   │
+  ┌─────────────┐   │  ┌──────────────┐      ┌──────────────────────┐  │
+  │  HOSPITAIS  │──►│  │  REQUISIÇÃO  │◄────►│      ALOCAÇÃO        │  │
+  │  (Suporte)  │   │  │   (Core)     │      │      (Core)          │  │
+  └─────────────┘   │  └──────┬───────┘      └──────────┬───────────┘  │
+       ACL          │         │                          │              │
+                    │         │ eventos                  │ consulta     │
+                    │         ▼                          ▼              │
+                    │  ┌──────────────┐      ┌──────────────────────┐  │
+                    │  │  EXPEDIÇÃO   │◄────►│      ESTOQUE         │  │
+                    │  │   (Core)     │      │      (Core)          │  │
+                    │  └──────┬───────┘      └──────────────────────┘  │
+                    │         │                                         │
+                    └─────────┼───────────────────────────────────────-┘
+                              │
+              ┌───────────────┼───────────────┐
+              │               │               │
+              ▼               ▼               ▼
+       ┌────────────┐  ┌─────────────┐  ┌──────────────┐
+       │ TELEMETRIA │  │ NOTIFICAÇÃO │  │  IDENTIDADE  │
+       │ (Suporte)  │  │ (Genérico)  │  │  (Genérico)  │
+       └────────────┘  └─────────────┘  └──────────────┘
+</code></pre>
+<hr />
+<h2>Relações Detalhadas</h2>
+<h3>1. Hospitais → Requisição</h3>
+<p><strong>Tipo:</strong> Cliente-Fornecedor com Camada Anticorrupção (ACL)<br />
+<strong>Descrição:</strong> O contexto de Requisição precisa saber qual hospital fez a solicitação e qual unidade solicitante. Ele consulta o contexto de Hospitais para obter essas informações, mas traduz o modelo para seu próprio vocabulário via ACL.<br />
+<strong>O que trafega:</strong> <code>hospitalId</code>, <code>unidadeId</code> — apenas identificadores, não o objeto completo.<br />
+<strong>Motivo da ACL:</strong> Requisição não deve depender do modelo interno de Hospital. Se Hospital mudar, a ACL absorve a mudança.</p>
+<hr />
+<h3>2. Requisição → Alocação</h3>
+<p><strong>Tipo:</strong> Cliente-Fornecedor (Requisição é downstream, Alocação é upstream)<br />
+<strong>Descrição:</strong> Quando uma requisição é registrada, o contexto de Alocação é acionado para verificar compatibilidade, aplicar FEFO e reservar bolsas. O resultado retorna como lista de alocações vinculadas à requisição.<br />
+<strong>O que trafega:</strong> <code>tipoSanguineo</code>, <code>componente</code>, <code>quantidade</code>, <code>urgencia</code> → retorna <code>Alocacao[]</code><br />
+<strong>Nota:</strong> Na implementação monolítica atual, esta comunicação é feita por chamada direta de serviço. Na projeção de microsserviços, seria via evento (<code>RequisicaoRegistrada</code>).</p>
+<hr />
+<h3>3. Alocação → Estoque</h3>
+<p><strong>Tipo:</strong> Cliente-Fornecedor com Camada Anticorrupção<br />
+<strong>Descrição:</strong> O contexto de Alocação consulta o Estoque para identificar bolsas disponíveis, verificar compatibilidade e marcar bolsas como reservadas. O Estoque tem autonomia sobre seu modelo interno de bolsa.<br />
+<strong>O que trafega:</strong> consulta por tipo sanguíneo + componente + disponibilidade; comando de reserva (<code>bolsaId</code>)<br />
+<strong>Invariante protegida:</strong> O Estoque é responsável por garantir que uma bolsa só possa ser reservada por uma requisição ativa.</p>
+<hr />
+<h3>4. Requisição → Expedição (evento)</h3>
+<p><strong>Tipo:</strong> Publicador-Assinante<br />
+<strong>Descrição:</strong> Quando uma requisição atinge o status "Atendida" (todas as alocações concluídas), ela publica o evento <code>RequisicaoAtendida</code>. O contexto de Expedição assina esse evento e prepara a guia de expedição.<br />
+<strong>Evento publicado:</strong> <code>RequisicaoAtendida { requisicaoId, hospitalId, bolsasAlocadas[] }</code><br />
+<strong>Nota:</strong> Na implementação monolítica, este evento é tratado internamente (listener Spring). Na projeção de microsserviços, seria via fila (RabbitMQ / SQS).</p>
+<hr />
+<h3>5. Expedição → Telemetria</h3>
+<p><strong>Tipo:</strong> Cliente-Fornecedor<br />
+<strong>Descrição:</strong> O contexto de Telemetria recebe o identificador da guia de expedição e registra leituras de temperatura e localização vinculadas a ela. A Expedição consulta a Telemetria para obter o histórico de leituras.<br />
+<strong>O que trafega:</strong> <code>guiaId</code>, leituras (<code>temperatura</code>, <code>latitude</code>, <code>longitude</code>, <code>timestamp</code>)</p>
+<hr />
+<h3>6. Telemetria → Notificação (evento)</h3>
+<p><strong>Tipo:</strong> Publicador-Assinante<br />
+<strong>Descrição:</strong> Quando uma leitura de temperatura fica fora da faixa configurada, a Telemetria publica o evento <code>AlertaTemperatura</code>. O contexto de Notificação assina e gera o alerta.<br />
+<strong>Evento publicado:</strong> <code>AlertaTemperatura { guiaId, temperatura, timestamp, limiteMinimo, limiteMaximo }</code></p>
+<hr />
+<h3>7. Requisição → Notificação (evento)</h3>
+<p><strong>Tipo:</strong> Publicador-Assinante<br />
+<strong>Descrição:</strong> A Requisição publica eventos (<code>RequisicaoRegistrada</code>, <code>RequisicaoAtendida</code>) que a Notificação assina para gerar avisos para os usuários.</p>
+<hr />
+<h3>8. Estoque → Notificação (evento)</h3>
+<p><strong>Tipo:</strong> Publicador-Assinante<br />
+<strong>Descrição:</strong> O Estoque publica <code>BolsaProximaDoVencimento</code> e <code>BolsaVencida</code>. A Notificação assina e alerta os operadores.</p>
+<hr />
+<h3>9. Todos os contextos → Identidade</h3>
+<p><strong>Tipo:</strong> Conformista<br />
+<strong>Descrição:</strong> Todos os contextos delegam autenticação e autorização ao contexto de Identidade. Os contextos consomem os dados do usuário autenticado (id, perfil, permissões) sem tradução — conformando ao modelo da Identidade.</p>
+<hr />
+<h2>Eventos de Domínio (opcional — entre contextos)</h2>
+<table>
+<thead>
+<tr>
+<th>Evento</th>
+<th>Publicado por</th>
+<th>Consumido por</th>
+<th>Descrição</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RequisicaoRegistrada</code></td>
+<td>Requisição</td>
+<td>Notificação</td>
+<td>Nova solicitação recebida</td>
+</tr>
+<tr>
+<td><code>BolsaReservada</code></td>
+<td>Alocação</td>
+<td>Estoque, Dashboard</td>
+<td>Bolsa alocada para uma requisição</td>
+</tr>
+<tr>
+<td><code>RequisicaoAtendida</code></td>
+<td>Requisição</td>
+<td>Expedição, Notificação</td>
+<td>Todas as alocações concluídas</td>
+</tr>
+<tr>
+<td><code>GuiaEmitida</code></td>
+<td>Expedição</td>
+<td>Telemetria, Notificação</td>
+<td>Expedição iniciada</td>
+</tr>
+<tr>
+<td><code>EntregaConcluida</code></td>
+<td>Expedição</td>
+<td>Requisição, Notificação</td>
+<td>Hemocomponentes entregues no hospital</td>
+</tr>
+<tr>
+<td><code>AlertaTemperatura</code></td>
+<td>Telemetria</td>
+<td>Notificação</td>
+<td>Temperatura fora da faixa configurada</td>
+</tr>
+<tr>
+<td><code>BolsaProximaDoVencimento</code></td>
+<td>Estoque</td>
+<td>Notificação</td>
+<td>Bolsa com validade próxima</td>
+</tr>
+<tr>
+<td><code>BolsaVencida</code></td>
+<td>Estoque</td>
+<td>Notificação, Alocação</td>
+<td>Bolsa vencida — deve ser bloqueada</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Referências</h2>
+<ul>
+<li>EVANS, E. <em>Domain-Driven Design</em>. Addison-Wesley, 2003.</li>
+<li>VERNON, V. <em>Implementing Domain-Driven Design</em>. Addison-Wesley, 2013.</li>
+<li>Slides das aulas 006 e 007 — Infraestrutura de Software · CESAR School · 2026.2</li>
+</ul>
+</div>
+<div class="section-break">
+<h1>Modelo Tático — Bounded Context: Requisição e Alocação</h1>
+<p><strong>Projeto:</strong> Rota Vital<br />
+<strong>Disciplina:</strong> Infraestrutura de Software · CESAR School · ADS · 2026.2<br />
+<strong>Trabalho:</strong> U2 · Parte 2 · Seção B — Modelo Tático de um Contexto Core</p>
+<hr />
+<h2>Contexto escolhido: Requisição e Alocação</h2>
+<p>Este é o Bounded Context principal (Core) do Rota Vital. Ele concentra as regras de negócio mais críticas: receber solicitações de hemocomponentes, verificar compatibilidade ABO/Rh, aplicar a regra FEFO e reservar bolsas de maneira segura e exclusiva.</p>
+<hr />
+<h2>Persona</h2>
+<p><strong>Nome fictício:</strong> Ana Beatriz Costa<br />
+<strong>Papel:</strong> Atendente de Hemoterapia — responsável por registrar solicitações hospitalares no Rota Vital<br />
+<strong>Contexto:</strong> Ana trabalha no banco de sangue. Quando um hospital liga pedindo hemocomponentes, ela acessa o sistema, informa o hospital, o tipo sanguíneo, o componente e a urgência. O sistema faz o restante: verifica estoque, checa compatibilidade, aplica FEFO e reserva as bolsas.<br />
+<strong>Frustração atual (sem sistema):</strong> Sem o Rota Vital, Ana consulta planilhas, verifica o estoque manualmente e corre o risco de reservar a mesma bolsa para dois hospitais ao mesmo tempo.</p>
+<hr />
+<h2>História de Usuário Âncora</h2>
+<blockquote>
+<p><strong>Como</strong> atendente de hemoterapia responsável pelo atendimento de um hospital,<br />
+<strong>Quero</strong> solicitar bolsas de sangue informando o tipo sanguíneo e o componente necessário,<br />
+<strong>Para que</strong> o sistema selecione e reserve automaticamente as bolsas compatíveis disponíveis, priorizando as que vencem primeiro.</p>
+</blockquote>
+<hr />
+<h2>Critérios de Aceite</h2>
+<p>Os critérios abaixo são testáveis e estão vinculados às invariantes do agregado.</p>
+<p><strong>CA1 — Rejeitar bolsas incompatíveis</strong><br />
+Dado que existe uma bolsa do tipo AB+ disponível,<br />
+quando o sistema processar uma requisição solicitando O-,<br />
+então a bolsa AB+ não deve ser alocada para essa requisição.</p>
+<p><strong>CA2 — Priorizar a validade mais próxima (FEFO)</strong><br />
+Dado que existem duas bolsas O+ disponíveis com datas de validade diferentes,<br />
+quando o sistema alocar bolsas para uma requisição O+,<br />
+então a bolsa com vencimento mais próximo deve ser alocada primeiro.</p>
+<p><strong>CA3 — Impedir reserva duplicada</strong><br />
+Dado que uma bolsa já está reservada para a Requisição #001,<br />
+quando o sistema tentar alocar a mesma bolsa para a Requisição #002,<br />
+então o sistema deve rejeitar a operação e manter a bolsa vinculada apenas à Requisição #001.</p>
+<p><strong>CA4 — Concluir requisição somente com todas as alocações realizadas</strong><br />
+Dado que uma requisição solicita 3 bolsas e apenas 2 foram alocadas,<br />
+quando o sistema verificar o status da requisição,<br />
+então o status deve permanecer como "Parcialmente atendida" e não "Atendida".</p>
+<hr />
+<h2>Agregado: Requisição</h2>
+<h3>Raiz do Agregado — <code>Requisicao</code></h3>
+<p>A <code>Requisicao</code> é a raiz do agregado. Ela controla todo o ciclo de vida da solicitação e garante que as invariantes sejam respeitadas.</p>
+<pre><code class="language-java">// Representação conceitual (não é código de produção final)
+public class Requisicao {
+    private UUID id;
+    private UUID hospitalId;           // referência ao contexto Hospitais
+    private UUID unidadeId;            // referência à unidade solicitante
+    private TipoSanguineo tipoSanguineo; // Value Object
+    private Componente componente;     // enum: CH, PFC, CP, CRIO
+    private int quantidadeSolicitada;
+    private Urgencia urgencia;         // enum: ROTINA, URGENCIA, EMERGENCIA
+    private StatusRequisicao status;
+    private LocalDateTime criadaEm;
+    private List&lt;Alocacao&gt; alocacoes;  // entidades internas
+}
+</code></pre>
+<p><strong>Invariantes protegidas pela raiz:</strong>
+- Não permite adicionar uma alocação com bolsa já alocada em outra requisição ativa.
+- Não permite mudar o status para ATENDIDA se <code>alocacoes.size() &lt; quantidadeSolicitada</code>.
+- Não permite cancelar uma requisição que já está em expedição.</p>
+<hr />
+<h3>Entidade Interna — <code>Alocacao</code></h3>
+<p>A <code>Alocacao</code> representa a reserva de uma bolsa específica para esta requisição. Ela não tem existência fora do agregado <code>Requisicao</code>.</p>
+<pre><code class="language-java">// Representação conceitual
+public class Alocacao {
+    private UUID id;
+    private UUID bolsaId;              // referência ao contexto Estoque
+    private Componente componente;
+    private LocalDate dataVencimentoBolsa; // copiado no momento da alocação (FEFO)
+    private LocalDateTime dataAlocacao;
+    private StatusAlocacao status;     // enum: RESERVADA, CONFIRMADA, CANCELADA
+}
+</code></pre>
+<p><strong>Regra:</strong> <code>bolsaId</code> é uma referência ao contexto de Estoque — não é um objeto <code>Bolsa</code> importado. Os contextos não compartilham classes de domínio.</p>
+<hr />
+<h3>Value Object — <code>TipoSanguineo</code></h3>
+<p>Imutável, sem identidade própria. Dois objetos com o mesmo ABO e Rh são considerados iguais.</p>
+<pre><code class="language-java">// Representação conceitual
+public final class TipoSanguineo {
+    private final ABO abo;      // enum: A, B, AB, O
+    private final Rh rh;        // enum: POSITIVO, NEGATIVO
+
+    // Construtor valida que abo e rh não são nulos
+    // equals e hashCode baseados em abo + rh
+    // toString: &quot;O-&quot;, &quot;AB+&quot;, &quot;A+&quot;
+
+    public boolean ehCompativel(TipoSanguineo receptor, Componente componente) {
+        // Consulta a MatrizCompatibilidade (configurável)
+        // Retorna true se este tipo pode ser doado para o receptor
+    }
+}
+</code></pre>
+<p><strong>Nota sobre a matriz de compatibilidade:</strong><br />
+A tabela abaixo é <strong>sintética e deve ser validada por profissional habilitado</strong> antes de qualquer uso real. É uma premissa do projeto para fins acadêmicos.</p>
+<table>
+<thead>
+<tr>
+<th>Tipo do doador</th>
+<th>Pode ser recebido por (Concentrado de Hemácias)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>O-</td>
+<td>O-, O+, A-, A+, B-, B+, AB-, AB+</td>
+</tr>
+<tr>
+<td>O+</td>
+<td>O+, A+, B+, AB+</td>
+</tr>
+<tr>
+<td>A-</td>
+<td>A-, A+, AB-, AB+</td>
+</tr>
+<tr>
+<td>A+</td>
+<td>A+, AB+</td>
+</tr>
+<tr>
+<td>B-</td>
+<td>B-, B+, AB-, AB+</td>
+</tr>
+<tr>
+<td>B+</td>
+<td>B+, AB+</td>
+</tr>
+<tr>
+<td>AB-</td>
+<td>AB-, AB+</td>
+</tr>
+<tr>
+<td>AB+</td>
+<td>AB+</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Premissa não validada:</strong> Esta matriz representa a compatibilidade para Concentrado de Hemácias. Para outros componentes (plaquetas, plasma), as regras diferem. A <code>MatrizCompatibilidade</code> deve ser configurável no sistema.</p>
+</blockquote>
+<hr />
+<h2>Invariantes do Agregado</h2>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>Invariante</th>
+<th>Onde é verificada</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Só bolsas compatíveis com o tipo sanguíneo solicitado podem ser alocadas</td>
+<td><code>Requisicao.alocar()</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Entre as bolsas compatíveis, priorizar a que vence primeiro (FEFO)</td>
+<td><code>ServicoAlocacao.selecionarBolsas()</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Uma bolsa não pode estar reservada em duas requisições ativas simultaneamente</td>
+<td><code>BolsaRepository</code> + constraint de banco</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Uma requisição só pode ter status ATENDIDA quando todas as alocações estão confirmadas</td>
+<td><code>Requisicao.concluir()</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Bolsas vencidas não podem ser alocadas</td>
+<td><code>Estoque</code> (verificado antes de retornar bolsas disponíveis)</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Enumerações</h2>
+<pre><code class="language-java">enum Componente {
+    CH,   // Concentrado de Hemácias
+    PFC,  // Plasma Fresco Congelado
+    CP,   // Concentrado de Plaquetas
+    CRIO  // Crioprecipitado
+}
+
+enum Urgencia {
+    ROTINA,
+    URGENCIA,
+    EMERGENCIA
+}
+
+enum StatusRequisicao {
+    PENDENTE,
+    EM_ANALISE,
+    PARCIALMENTE_ATENDIDA,
+    ATENDIDA,
+    EM_EXPEDICAO,
+    CONCLUIDA,
+    CANCELADA
+}
+
+enum StatusAlocacao {
+    RESERVADA,
+    CONFIRMADA,
+    CANCELADA
+}
+</code></pre>
+<hr />
+<h2>Referências</h2>
+<ul>
+<li>EVANS, E. <em>Domain-Driven Design</em>. Addison-Wesley, 2003.</li>
+<li>VERNON, V. <em>Implementing Domain-Driven Design</em>. Addison-Wesley, 2013.</li>
+<li>Slides das aulas 006 e 007 — Infraestrutura de Software · CESAR School · 2026.2</li>
+</ul>
+</div>
+<div class="section-break">
+<h1>Cenários BDD — Requisição e Alocação</h1>
+<p><strong>Projeto:</strong> Rota Vital<br />
+<strong>Disciplina:</strong> Infraestrutura de Software · CESAR School · ADS · 2026.2<br />
+<strong>Trabalho:</strong> U2 · Parte 2 · Seção B — Cenário Gherkin</p>
+<hr />
+<h2>Funcionalidade: Alocar bolsas para uma requisição hospitalar</h2>
+<pre><code class="language-gherkin"># language: pt
+Funcionalidade: Alocar bolsas compatíveis para uma requisição hospitalar
+  Como atendente de hemoterapia responsável pelo atendimento de um hospital
+  Quero solicitar bolsas de sangue informando o tipo sanguíneo e o componente necessário
+  Para que o sistema selecione e reserve automaticamente as bolsas compatíveis disponíveis
+       priorizando as que vencem primeiro
+
+  Contexto:
+    Dado que o hospital &quot;Hospital São Lucas&quot; está cadastrado no sistema
+    E a usuária &quot;Ana Beatriz&quot; está autenticada com o perfil &quot;Atendimento&quot;
+
+  # CA2 — FEFO: priorizar a bolsa com vencimento mais próximo
+  Cenário: Alocar a bolsa compatível com vencimento mais próximo (FEFO)
+    Dado que existem as seguintes bolsas disponíveis no estoque:
+      | bolsaId | tipoSanguineo | componente | dataValidade |
+      | BOLSA-A | O+            | CH         | 2026-11-25   |
+      | BOLSA-B | O+            | CH         | 2026-11-15   |
+      | BOLSA-C | O+            | CH         | 2026-12-01   |
+    Quando Ana Beatriz registra uma requisição para &quot;Hospital São Lucas&quot; solicitando:
+      | campo              | valor |
+      | tipoSanguineo      | O+    |
+      | componente         | CH    |
+      | quantidade         | 1     |
+      | urgencia           | ROTINA|
+    Então o sistema deve alocar a bolsa &quot;BOLSA-B&quot; (vencimento 2026-11-15)
+    E o status da requisição deve ser &quot;Atendida&quot;
+    E a bolsa &quot;BOLSA-B&quot; deve ter status &quot;Reservada&quot; no estoque
+
+  # CA1 — Rejeitar bolsa incompatível
+  Cenário: Não alocar bolsa com tipo sanguíneo incompatível
+    Dado que existe apenas a bolsa &quot;BOLSA-X&quot; do tipo &quot;AB+&quot; com componente &quot;CH&quot; disponível
+    Quando Ana Beatriz registra uma requisição solicitando tipo &quot;O-&quot; componente &quot;CH&quot;
+    Então o sistema não deve alocar nenhuma bolsa
+    E o status da requisição deve ser &quot;Pendente&quot;
+    E o sistema deve informar que não há bolsas compatíveis disponíveis
+
+  # CA3 — Impedir reserva duplicada
+  Cenário: Não alocar a mesma bolsa para duas requisições ativas
+    Dado que a bolsa &quot;BOLSA-D&quot; do tipo &quot;A+&quot; componente &quot;CH&quot; está reservada para a requisição &quot;REQ-001&quot;
+    Quando o sistema tentar alocar &quot;BOLSA-D&quot; para uma nova requisição &quot;REQ-002&quot; solicitando &quot;A+&quot; CH
+    Então o sistema não deve alocar &quot;BOLSA-D&quot; para &quot;REQ-002&quot;
+    E a bolsa &quot;BOLSA-D&quot; deve permanecer vinculada apenas à requisição &quot;REQ-001&quot;
+
+  # CA4 — Requisição parcialmente atendida
+  Cenário: Manter status como &quot;Parcialmente atendida&quot; quando não há bolsas suficientes
+    Dado que existe apenas 1 bolsa &quot;O+&quot; de componente &quot;CH&quot; disponível no estoque
+    Quando Ana Beatriz registra uma requisição solicitando 3 bolsas &quot;O+&quot; de componente &quot;CH&quot;
+    Então o sistema deve alocar 1 bolsa
+    E o status da requisição deve ser &quot;Parcialmente atendida&quot;
+    E o sistema deve informar que apenas 1 de 3 bolsas foram alocadas
+
+  # Regra de urgência — emergência tem prioridade (cenário adicional)
+  Cenário: Requisição de emergência é processada antes de requisições de rotina
+    Dado que existe apenas 1 bolsa &quot;B-&quot; de componente &quot;CH&quot; disponível
+    E existe uma requisição de &quot;ROTINA&quot; pendente para &quot;B-&quot; CH
+    Quando o sistema registra uma nova requisição de &quot;EMERGENCIA&quot; para &quot;B-&quot; CH
+    Então o sistema deve priorizar a alocação para a requisição de &quot;EMERGENCIA&quot;
+</code></pre>
+<hr />
+<h2>Mapeamento Critérios de Aceite ↔ Cenários Gherkin</h2>
+<table>
+<thead>
+<tr>
+<th>Critério de Aceite</th>
+<th>Cenário Gherkin</th>
+<th>Invariante</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>CA1 — Rejeitar incompatíveis</td>
+<td>"Não alocar bolsa com tipo sanguíneo incompatível"</td>
+<td>Invariante 1</td>
+</tr>
+<tr>
+<td>CA2 — Priorizar FEFO</td>
+<td>"Alocar a bolsa compatível com vencimento mais próximo"</td>
+<td>Invariante 2</td>
+</tr>
+<tr>
+<td>CA3 — Impedir duplicata</td>
+<td>"Não alocar a mesma bolsa para duas requisições ativas"</td>
+<td>Invariante 3</td>
+</tr>
+<tr>
+<td>CA4 — Concluir com todas alocações</td>
+<td>"Manter status como Parcialmente atendida..."</td>
+<td>Invariante 4</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Nota sobre a Implementação (Parte 3)</h2>
+<p>Estes cenários serão convertidos em testes executáveis com <strong>Cucumber</strong> (mesma ferramenta já usada no Mesa DJ) na Parte 3 do trabalho. Os steps (<code>@Dado</code>, <code>@Quando</code>, <code>@Então</code>) serão implementados em Java, usando Testcontainers para subir o PostgreSQL nos testes de aceitação.</p>
+<p>O cenário <strong>principal</strong> para a Parte 3 é o FEFO (CA2) — será o primeiro cenário implementado e executado.</p>
+<hr />
+<h2>Referências</h2>
+<ul>
+<li>EVANS, E. <em>Domain-Driven Design</em>. Addison-Wesley, 2003.</li>
+<li>CUCUMBER. <em>Gherkin Reference</em>. Disponível em: https://cucumber.io/docs/gherkin/</li>
+<li>Slides das aulas 006 e 007 — Infraestrutura de Software · CESAR School · 2026.2</li>
+</ul>
+</div>
+<div class="section-break">
+<h1>Arquitetura em Três Camadas — Rota Vital</h1>
+<p><strong>Projeto:</strong> Rota Vital<br />
+<strong>Disciplina:</strong> Infraestrutura de Software · CESAR School · ADS · 2026.2<br />
+<strong>Trabalho:</strong> U2 · Parte 2 · Seção C — Arquitetura em Três Camadas</p>
+<hr />
+<h2>Visão Geral</h2>
+<p>O Rota Vital é organizado como um <strong>monolito modular</strong> com arquitetura em três camadas lógicas. Essa separação garante que cada parte do sistema tenha uma responsabilidade clara e que as regras de negócio fiquem isoladas de detalhes de infraestrutura.</p>
+<pre><code>┌────────────────────────────────────────────────────┐
+│                 APRESENTAÇÃO                        │
+│  Controllers REST · Formulários · Validação de     │
+│  entrada · Respostas HTTP (JSON/HTML)               │
+├────────────────────────────────────────────────────┤
+│                   NEGÓCIO                           │
+│  Casos de uso · Serviços de aplicação ·            │
+│  Entidades · Agregados · Value Objects ·           │
+│  Regras de negócio · Eventos de domínio            │
+├────────────────────────────────────────────────────┤
+│                    DADOS                            │
+│  Repositórios JPA · Migrações Flyway ·             │
+│  Entidades de banco · Integrações externas         │
+└────────────────────────────────────────────────────┘
+</code></pre>
+<hr />
+<h2>Camada 1: Apresentação</h2>
+<p><strong>Responsabilidade:</strong> Receber requisições HTTP, validar os dados de entrada, chamar a camada de negócio e devolver respostas no formato adequado (JSON para APIs, HTML para interfaces web).</p>
+<p><strong>O que fica aqui:</strong>
+- Controllers REST (<code>@RestController</code>, <code>@Controller</code>)
+- DTOs de entrada e saída (Request / Response)
+- Validação de campos (<code>@Valid</code>, <code>@NotNull</code>, <code>@NotBlank</code>)
+- Tratamento de erros HTTP (<code>@ControllerAdvice</code>)
+- Arquivos estáticos (HTML, CSS, JavaScript)</p>
+<p><strong>O que NÃO fica aqui:</strong>
+- Regras de negócio
+- Acesso direto ao banco de dados
+- Lógica de compatibilidade ABO/Rh ou FEFO</p>
+<p><strong>Exemplo no Rota Vital:</strong></p>
+<pre><code>RequisicaoController  → recebe POST /api/requisicoes
+                       → valida os campos obrigatórios
+                       → chama RegistrarRequisicaoUseCase
+                       → retorna 201 Created com o id da requisição
+</code></pre>
+<hr />
+<h2>Camada 2: Negócio</h2>
+<p><strong>Responsabilidade:</strong> Conter toda a lógica de negócio do sistema. É o coração do Rota Vital.</p>
+<p>A camada de negócio é dividida em duas subcamadas:</p>
+<h3>2.1. Aplicação (Casos de Uso)</h3>
+<p>Orquestra o domínio para executar uma operação de negócio completa. Um caso de uso não tem regras de negócio — ele coordena entidades, repositórios e eventos.</p>
+<p><strong>O que fica aqui:</strong>
+- Casos de uso / serviços de aplicação (<code>RegistrarRequisicao</code>, <code>AlocarBolsas</code>, <code>ConsultarEstoque</code>)
+- Orquestração de chamadas entre entidades e repositórios
+- Publicação de eventos de domínio
+- Controle de transações (<code>@Transactional</code>)</p>
+<p><strong>Exemplo:</strong></p>
+<pre><code>RegistrarRequisicaoUseCase:
+  1. Busca hospital pelo hospitalId
+  2. Cria o agregado Requisicao
+  3. Chama AlocarBolsasUseCase (compatibilidade + FEFO)
+  4. Salva via RequisicaoRepository
+  5. Publica evento RequisicaoRegistrada
+  6. Retorna RequisicaoResponse
+</code></pre>
+<h3>2.2. Domínio (Entidades, Agregados, Value Objects)</h3>
+<p>Contém o modelo de domínio puro. As entidades de domínio têm comportamento — não são apenas estruturas de dados (anemic domain model é um antipadrão aqui).</p>
+<p><strong>O que fica aqui:</strong>
+- Entidades (<code>Requisicao</code>, <code>Alocacao</code>, <code>Bolsa</code>, <code>Hospital</code>)
+- Agregados (raiz: <code>Requisicao</code>)
+- Value Objects (<code>TipoSanguineo</code>, <code>CNPJ</code>, <code>Validade</code>)
+- Enumerações de domínio (<code>StatusRequisicao</code>, <code>Componente</code>, <code>Urgencia</code>)
+- Exceções de negócio (<code>RequisicaoNaoEncontradaException</code>, <code>BolsaIncompativelException</code>)
+- Interfaces de repositório (apenas a interface — a implementação fica na camada de Dados)
+- Eventos de domínio (<code>RequisicaoRegistrada</code>, <code>BolsaReservada</code>)</p>
+<p><strong>Regra fundamental:</strong> O domínio <strong>não deve depender</strong> de controllers, banco de dados ou frameworks web. Uma entidade de domínio é Java puro.</p>
+<hr />
+<h2>Camada 3: Dados</h2>
+<p><strong>Responsabilidade:</strong> Persistir e recuperar dados. Implementa as interfaces de repositório definidas no domínio.</p>
+<p><strong>O que fica aqui:</strong>
+- Implementações de repositório JPA (<code>RequisicaoRepositoryJpa</code>, <code>BolsaRepositoryJpa</code>)
+- Entidades JPA (podem ser as mesmas do domínio ou classes separadas com <code>@Entity</code>)
+- Migrações de banco de dados (Flyway — <code>V1__cria_hospitais.sql</code>, <code>V2__cria_bolsas.sql</code>, etc.)
+- Configuração de conexão com banco (<code>application.yml</code>)
+- Integrações externas (APIs de terceiros, mensageria)</p>
+<p><strong>O que NÃO fica aqui:</strong>
+- Regras de negócio
+- Lógica de compatibilidade
+- Código de apresentação</p>
+<hr />
+<h2>Regra de Dependência</h2>
+<pre><code>Apresentação  →  Negócio (Aplicação)  →  Negócio (Domínio)
+     ↓                    ↓
+   Dados              Dados (implementa interfaces do Domínio)
+</code></pre>
+<p><strong>Em palavras:</strong>
+- A <strong>Apresentação</strong> usa a camada de <strong>Negócio</strong> (casos de uso) — nunca acessa o banco diretamente.
+- A camada de <strong>Negócio (Aplicação)</strong> coordena o <strong>Domínio</strong> e usa interfaces de repositório.
+- O <strong>Domínio</strong> não depende de nada externo — nem de Spring, nem de JPA, nem de HTTP.
+- A camada de <strong>Dados</strong> implementa as interfaces definidas no Domínio e conhece o Spring Data JPA.</p>
+<p>Essa regra garante que as regras de negócio possam ser testadas <strong>sem banco de dados e sem servidor web</strong> — exatamente como fizemos nos testes unitários do Mesa DJ.</p>
+<hr />
+<h2>Estrutura de Pacotes — Por Bounded Context e Camada</h2>
+<pre><code>br.cesar.rotavital/
+│
+├── hospitais/
+│   ├── apresentacao/
+│   │   └── HospitalController.java
+│   ├── negocio/
+│   │   ├── aplicacao/
+│   │   │   ├── CadastrarHospital.java        (caso de uso)
+│   │   │   └── ConsultarHospital.java
+│   │   └── dominio/
+│   │       ├── Hospital.java                 (entidade)
+│   │       ├── Unidade.java                  (entidade)
+│   │       ├── CNPJ.java                     (value object)
+│   │       └── HospitalRepository.java       (interface)
+│   └── dados/
+│       └── HospitalRepositoryJpa.java        (implementação)
+│
+├── estoque/
+│   ├── apresentacao/
+│   │   └── BolsaController.java
+│   ├── negocio/
+│   │   ├── aplicacao/
+│   │   │   ├── RegistrarBolsa.java
+│   │   │   ├── ConsultarEstoque.java
+│   │   │   └── DescartarBolsa.java
+│   │   └── dominio/
+│   │       ├── Bolsa.java                    (entidade — raiz do agregado)
+│   │       ├── TipoSanguineo.java            (value object)
+│   │       ├── Validade.java                 (value object)
+│   │       ├── StatusBolsa.java              (enum)
+│   │       └── BolsaRepository.java          (interface)
+│   └── dados/
+│       └── BolsaRepositoryJpa.java
+│
+├── requisicao/
+│   ├── apresentacao/
+│   │   └── RequisicaoController.java
+│   ├── negocio/
+│   │   ├── aplicacao/
+│   │   │   ├── RegistrarRequisicao.java      (caso de uso âncora)
+│   │   │   ├── AlocarBolsas.java             (aplica FEFO + compatibilidade)
+│   │   │   └── ConcluirRequisicao.java
+│   │   └── dominio/
+│   │       ├── Requisicao.java               (raiz do agregado)
+│   │       ├── Alocacao.java                 (entidade interna)
+│   │       ├── TipoSanguineo.java            (value object — cópia local)
+│   │       ├── MatrizCompatibilidade.java    (regra configurável)
+│   │       ├── StatusRequisicao.java         (enum)
+│   │       └── RequisicaoRepository.java     (interface)
+│   └── dados/
+│       └── RequisicaoRepositoryJpa.java
+│
+├── expedicao/
+│   ├── apresentacao/
+│   │   └── ExpedicaoController.java
+│   ├── negocio/
+│   │   ├── aplicacao/
+│   │   │   └── EmitirGuia.java
+│   │   └── dominio/
+│   │       ├── GuiaExpedicao.java
+│   │       ├── BolsaTransportada.java        (VO — Bolsa no contexto Expedição)
+│   │       └── GuiaRepository.java
+│   └── dados/
+│       └── GuiaRepositoryJpa.java
+│
+├── telemetria/
+│   ├── apresentacao/
+│   │   └── TelemetriaController.java
+│   ├── negocio/
+│   │   ├── aplicacao/
+│   │   │   └── RegistrarLeitura.java
+│   │   └── dominio/
+│   │       ├── LeituraTemperatura.java
+│   │       └── LeituraRepository.java
+│   └── dados/
+│       └── LeituraRepositoryJpa.java
+│
+├── notificacao/
+│   └── dominio/
+│       ├── Notificacao.java
+│       └── NotificacaoService.java
+│
+└── identidade/
+    ├── apresentacao/
+    │   └── AuthController.java
+    ├── negocio/
+    │   ├── aplicacao/
+    │   │   └── Autenticar.java
+    │   └── dominio/
+    │       ├── Usuario.java
+    │       ├── Perfil.java
+    │       └── UsuarioRepository.java
+    └── dados/
+        └── UsuarioRepositoryJpa.java
+</code></pre>
+<hr />
+<h2>Diferença entre Camadas Lógicas e Tiers Físicos</h2>
+<h3>Camadas lógicas (layers)</h3>
+<p>São divisões <strong>conceituais</strong> dentro do mesmo processo. No Rota Vital (monolito modular), as três camadas — apresentação, negócio e dados — rodam dentro do <strong>mesmo processo Java</strong> (JVM), no <strong>mesmo container Docker</strong>.</p>
+<p>A separação é de responsabilidade e dependência, não de deploy.</p>
+<h3>Tiers físicos (tiers)</h3>
+<p>São divisões <strong>físicas</strong> de infraestrutura — máquinas, processos ou serviços diferentes.</p>
+<p>No Rota Vital, temos <strong>dois tiers físicos</strong>:</p>
+<table>
+<thead>
+<tr>
+<th>Tier</th>
+<th>O que roda</th>
+<th>Onde</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Tier 1</strong></td>
+<td>Aplicação Java (Spring Boot) — apresentação + negócio + dados</td>
+<td>Container <code>api</code></td>
+</tr>
+<tr>
+<td><strong>Tier 2</strong></td>
+<td>Banco de dados PostgreSQL</td>
+<td>Container <code>db</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code>[ Browser / Cliente REST ]
+          ↓ HTTP
+  ┌───────────────────────────────────────────┐
+  │   Tier 1: Container api (JVM / Spring)    │
+  │  ┌─────────────┐                          │
+  │  │ Apresentação│                          │
+  │  ├─────────────┤   (camadas lógicas)      │
+  │  │   Negócio   │   dentro do mesmo        │
+  │  ├─────────────┤   processo               │
+  │  │    Dados    │                          │
+  │  └─────────────┘                          │
+  └───────────────────────────────────────────┘
+          ↓ JDBC / TCP 5432
+  ┌───────────────────────────────────────────┐
+  │   Tier 2: Container db (PostgreSQL 16)    │
+  └───────────────────────────────────────────┘
+</code></pre>
+<p><strong>Resumo prático:</strong><br />
+- 3 camadas lógicas → separação de responsabilidade (dentro do mesmo processo)<br />
+- 2 tiers físicos → app + banco (processos/máquinas distintos)<br />
+- Na projeção de microsserviços, cada serviço teria seu próprio tier físico</p>
+<hr />
+<h2>Referências</h2>
+<ul>
+<li>EVANS, E. <em>Domain-Driven Design</em>. Addison-Wesley, 2003.</li>
+<li>FOWLER, M. <em>Patterns of Enterprise Application Architecture</em>. Addison-Wesley, 2002.</li>
+<li>Slides das aulas 006 e 007 — Infraestrutura de Software · CESAR School · 2026.2</li>
+</ul>
+</div>
+<div class="section-break">
+<h1>Projeção para Microsserviços — Rota Vital</h1>
+<p><strong>Projeto:</strong> Rota Vital<br />
+<strong>Disciplina:</strong> Infraestrutura de Software · CESAR School · ADS · 2026.2<br />
+<strong>Trabalho:</strong> U2 · Parte 2 · Seção D — Projeção com Microsserviços</p>
+<hr />
+<h2>Introdução</h2>
+<p>O Rota Vital começa como um monolito modular (ADR 0001). Esta seção documenta como o sistema poderia evoluir para microsserviços, quais contextos seriam extraídos primeiro, como eles se comunicariam e como os dados seriam separados.</p>
+<p>Esta projeção não é o estado atual — é o planejamento de uma evolução futura, materializada caso o volume de operações justifique a complexidade adicional.</p>
+<hr />
+<h2>Quais Contextos Virariam Serviços</h2>
+<h3>Candidatos a extração independente</h3>
+<table>
+<thead>
+<tr>
+<th>Bounded Context</th>
+<th>Prioridade</th>
+<th>Motivo</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Telemetria</strong></td>
+<td>🔴 Alta</td>
+<td>Volume de dados cresce muito mais rápido que os outros contextos — leituras contínuas de GPS + temperatura por veículo. Pode precisar de escala independente e banco otimizado para séries temporais.</td>
+</tr>
+<tr>
+<td><strong>Notificação</strong></td>
+<td>🟡 Média</td>
+<td>Já é genérico, pode usar SaaS (SendGrid, Twilio). Desacoplar facilita troca de provedor.</td>
+</tr>
+<tr>
+<td><strong>Identidade</strong></td>
+<td>🟡 Média</td>
+<td>Reutilizável por outros sistemas. Pode ser substituído por Keycloak ou Auth0.</td>
+</tr>
+<tr>
+<td><strong>Expedição</strong></td>
+<td>🟢 Baixa</td>
+<td>Pode escalar independentemente se o volume de guias crescer muito.</td>
+</tr>
+<tr>
+<td><strong>Hospitais</strong></td>
+<td>🟢 Baixa</td>
+<td>Dados relativamente estáticos; extração traz pouco benefício imediato.</td>
+</tr>
+<tr>
+<td><strong>Requisição + Estoque</strong></td>
+<td>🔵 Mantém junto</td>
+<td>Alta coesão e acoplamento transacional. Separar exigiria Sagas complexas.</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Arquitetura Alvo (Projeção)</h2>
+<pre><code>[ Browser / App Móvel ]
+        │ HTTPS
+        ▼
+┌─────────────────┐
+│   API Gateway   │  ← Roteia requisições, autentica via Identidade
+└────────┬────────┘
+         │
+   ┌─────┼──────────────────────────────────┐
+   │     │                                  │
+   ▼     ▼                                  ▼
+┌──────┐ ┌───────────────────────┐  ┌─────────────────┐
+│Ident.│ │  Requisição + Estoque │  │   Expedição     │
+│Serv. │ │       Serviço         │  │   Serviço       │
+│      │ │  (Core principal)     │  │                 │
+│ DB:  │ │  DB: PostgreSQL       │  │  DB: PostgreSQL │
+│Postgres│ └───────────┬─────────┘  └────────┬────────┘
+└──────┘              │                      │
+                      │ eventos              │ eventos
+                      ▼                      ▼
+              ┌──────────────────────────────────────┐
+              │        Message Broker                 │
+              │  (RabbitMQ / Amazon SQS)              │
+              └────┬────────────────────┬────────────┘
+                   │                    │
+                   ▼                    ▼
+         ┌──────────────┐    ┌──────────────────┐
+         │  Telemetria  │    │   Notificação    │
+         │   Serviço    │    │    Serviço       │
+         │ DB: TimescaleDB│  │ (SaaS externo)   │
+         └──────────────┘    └──────────────────┘
+</code></pre>
+<hr />
+<h2>Comunicação entre Serviços</h2>
+<h3>REST (síncrono)</h3>
+<p>Usado quando o chamador precisa da resposta imediatamente.</p>
+<table>
+<thead>
+<tr>
+<th>De</th>
+<th>Para</th>
+<th>Operação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>API Gateway</td>
+<td>Qualquer serviço</td>
+<td>Roteamento de requisições</td>
+</tr>
+<tr>
+<td>Requisição</td>
+<td>Hospitais</td>
+<td>Verificar se hospital existe</td>
+</tr>
+<tr>
+<td>Requisição</td>
+<td>Estoque</td>
+<td>Consultar bolsas disponíveis</td>
+</tr>
+</tbody>
+</table>
+<h3>Eventos / Fila (assíncrono)</h3>
+<p>Usado quando o chamador não precisa esperar a resposta — "dispara e esquece".</p>
+<table>
+<thead>
+<tr>
+<th>Evento</th>
+<th>Publicado por</th>
+<th>Consumido por</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>RequisicaoRegistrada</code></td>
+<td>Requisição+Estoque</td>
+<td>Notificação</td>
+</tr>
+<tr>
+<td><code>BolsaReservada</code></td>
+<td>Estoque</td>
+<td>— (log, dashboard)</td>
+</tr>
+<tr>
+<td><code>RequisicaoAtendida</code></td>
+<td>Requisição</td>
+<td>Expedição, Notificação</td>
+</tr>
+<tr>
+<td><code>GuiaEmitida</code></td>
+<td>Expedição</td>
+<td>Telemetria, Notificação</td>
+</tr>
+<tr>
+<td><code>AlertaTemperatura</code></td>
+<td>Telemetria</td>
+<td>Notificação</td>
+</tr>
+<tr>
+<td><code>EntregaConcluida</code></td>
+<td>Expedição</td>
+<td>Requisição+Estoque, Notificação</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Estratégia de Dados por Serviço</h2>
+<p>Cada microsserviço tem seu próprio banco — sem banco compartilhado.</p>
+<table>
+<thead>
+<tr>
+<th>Serviço</th>
+<th>Banco</th>
+<th>Justificativa</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Requisição + Estoque</td>
+<td>PostgreSQL</td>
+<td>Transações ACID entre bolsa e alocação</td>
+</tr>
+<tr>
+<td>Expedição</td>
+<td>PostgreSQL</td>
+<td>Relacionamentos entre guias, veículos e bolsas</td>
+</tr>
+<tr>
+<td>Telemetria</td>
+<td>TimescaleDB (PostgreSQL extension)</td>
+<td>Otimizado para séries temporais; queries por intervalo de tempo</td>
+</tr>
+<tr>
+<td>Identidade</td>
+<td>PostgreSQL</td>
+<td>Dados relacionais de usuários e permissões</td>
+</tr>
+<tr>
+<td>Notificação</td>
+<td>Sem banco próprio</td>
+<td>Usa SaaS externo (SendGrid, Twilio)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Referência cruzada:</strong> Quando um serviço precisa de dado de outro, ele armazena apenas o <code>id</code> de referência — nunca o objeto completo. Consultas cross-service são feitas via REST ou eventos.</p>
+<hr />
+<h2>Exemplo de Saga: Expedição de Hemocomponentes</h2>
+<p>A Saga é um padrão de consistência eventual para transações distribuídas. No Rota Vital, a expedição de hemocomponentes envolve múltiplos serviços.</p>
+<h3>Fluxo normal (happy path)</h3>
+<pre><code>1. Requisição+Estoque    → Publica RequisicaoAtendida
+2. Expedição             → Recebe evento, inicia guia
+3. Expedição             → Verifica disponibilidade de veículo
+4. Expedição             → Confirma expedição, publica GuiaEmitida
+5. Telemetria            → Recebe GuiaEmitida, começa a registrar leituras
+6. Notificação           → Recebe GuiaEmitida, envia alerta ao hospital
+</code></pre>
+<h3>Fluxo de compensação (falha: veículo indisponível)</h3>
+<pre><code>1. Requisição+Estoque    → Publica RequisicaoAtendida
+2. Expedição             → Recebe evento, inicia guia
+3. Expedição             → Verifica veículo → INDISPONÍVEL
+4. Expedição             → Publica ExpedicaoCancelada (compensação)
+5. Requisição+Estoque    → Recebe ExpedicaoCancelada
+                         → Cancela reservas das bolsas
+                         → Muda status das bolsas para Disponível
+                         → Muda status da requisição para Atendida (aguardando expedição)
+                         → Registra ocorrência
+6. Notificação           → Recebe ExpedicaoCancelada
+                         → Alerta o operador de expedição
+</code></pre>
+<p><strong>Tipo de Saga:</strong> Coreografada (cada serviço reage a eventos, sem orquestrador central). Adequada para fluxos simples como este.</p>
+<hr />
+<h2>Comparação: Monolito Modular vs. Microsserviços</h2>
+<table>
+<thead>
+<tr>
+<th>Aspecto</th>
+<th>Monolito Modular (atual)</th>
+<th>Microsserviços (projeção)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Unidade de implantação</strong></td>
+<td>Um único artefato (JAR + Docker image)</td>
+<td>Múltiplos serviços, cada um com seu próprio container e pipeline</td>
+</tr>
+<tr>
+<td><strong>Escalabilidade</strong></td>
+<td>Toda a aplicação escala junta</td>
+<td>Cada serviço escala de forma independente (ex.: Telemetria pode ter 10 réplicas enquanto Hospitais tem 1)</td>
+</tr>
+<tr>
+<td><strong>Consistência</strong></td>
+<td>Transações ACID garantidas pelo banco único</td>
+<td>Consistência eventual via Sagas; mais complexo de implementar e testar</td>
+</tr>
+<tr>
+<td><strong>Custo de infraestrutura</strong></td>
+<td>Baixo — 1 instância de app + 1 banco</td>
+<td>Alto — múltiplas instâncias, múltiplos bancos, message broker, API Gateway</td>
+</tr>
+<tr>
+<td><strong>Complexidade operacional</strong></td>
+<td>Baixa — <code>docker compose up</code></td>
+<td>Alta — Kubernetes ou ECS, service discovery, tracing distribuído, circuit breakers</td>
+</tr>
+<tr>
+<td><strong>Tempo de desenvolvimento</strong></td>
+<td>Menor — sem overhead de comunicação entre serviços</td>
+<td>Maior — cada serviço precisa de CI/CD próprio, contratos de API, gestão de versões</td>
+</tr>
+<tr>
+<td><strong>Isolamento de falhas</strong></td>
+<td>Um bug pode afetar todos os módulos</td>
+<td>Um serviço com falha não derruba os outros (com circuit breaker)</td>
+</tr>
+<tr>
+<td><strong>Recomendado quando</strong></td>
+<td>Time pequeno, escopo definido, volume moderado</td>
+<td>Time grande, escala por serviço necessária, domínio estável e bem definido</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Conclusão:</strong> Para o Rota Vital acadêmico e para uma operação de pequeno a médio porte, o monolito modular é a escolha correta. A projeção para microsserviços é o plano de evolução para quando o volume de telemetria justificar a separação.</p>
+<hr />
+<h2>Referências</h2>
+<ul>
+<li>NEWMAN, S. <em>Building Microservices</em>. 2. ed., O'Reilly, 2021.</li>
+<li>RICHARDSON, C. <em>Microservices Patterns</em>. Manning, 2018.</li>
+<li>JONAS, E. et al. <em>A Berkeley View on Serverless Computing</em>. 2019.</li>
+<li>Slides das aulas 006 e 007 — Infraestrutura de Software · CESAR School · 2026.2</li>
+</ul>
+</div>
+<div class="section-break">
+<h1>ADR 0001: Decomposição do Rota Vital</h1>
+<p><strong>Status:</strong> Proposto<br />
+<strong>Data:</strong> Novembro de 2026<br />
+<strong>Projeto:</strong> Rota Vital · CESAR School · ADS · 2026.2</p>
+<hr />
+<h2>Contexto</h2>
+<p>O Rota Vital gerencia operações logísticas de hemocomponentes, cobrindo desde o controle de estoque até a expedição com cadeia fria e telemetria de temperatura.</p>
+<p>Precisamos decidir como decompor o sistema em unidades de software — seja como módulos dentro de um único processo ou como serviços independentes.</p>
+<p>As premissas do contexto são:
+- Equipe pequena (5 estudantes), sem experiência operacional com microsserviços em produção.
+- Prazo acadêmico curto (Partes 2 e 3 do PI).
+- O sistema precisa ser compreensível, testável e implantável com facilidade.
+- O volume de requisições é pequeno a moderado — não há necessidade imediata de escala independente por serviço.
+- A telemetria tem potencial de crescimento de volume muito maior que os outros contextos (leituras contínuas de GPS + temperatura).</p>
+<p>Consideramos duas alternativas:
+1. <strong>Monolito modular</strong>: um único processo com módulos bem definidos por Bounded Context.
+2. <strong>Microsserviços</strong>: cada Bounded Context como um serviço independente com banco próprio.</p>
+<hr />
+<h2>Decisão</h2>
+<p>Adotamos o <strong>monolito modular</strong> como arquitetura inicial, com separação clara de módulos por Bounded Context (hospitais, estoque, requisição, expedição, telemetria, notificação, identidade).</p>
+<p>Os módulos seguem a mesma separação de responsabilidades que teriam como microsserviços — domain, application, infrastructure — mas rodam no mesmo processo.</p>
+<hr />
+<h2>Consequências</h2>
+<p><strong>O que melhora:</strong>
+- Implantação simples: um único <code>docker compose up</code> sobe tudo.
+- Sem overhead de rede entre serviços (chamadas locais são mais rápidas e confiáveis).
+- Consistência transacional garantida pelo banco único — sem necessidade de Sagas distribuídas.
+- Mais fácil de depurar, testar e entender para uma equipe acadêmica.
+- A separação por módulos mantém o caminho aberto para extração futura como microsserviço.</p>
+<p><strong>O que piora / riscos:</strong>
+- Escalar apenas um módulo (ex.: Telemetria) exige escalar toda a aplicação.
+- Um bug crítico em qualquer módulo pode afetar toda a aplicação.
+- À medida que o sistema cresce, o risco de acoplamento entre módulos aumenta.</p>
+<p><strong>Alternativa descartada:</strong>
+Microsserviços foram descartados nesta fase porque adicionariam complexidade operacional (service discovery, comunicação assíncrona, consistência distribuída) desproporcional ao tamanho e ao prazo do projeto acadêmico. A projeção para microsserviços está documentada separadamente e pode ser materializada na Parte 3 ou em versões futuras.</p>
+</div>
+<div class="section-break">
+<h1>ADR 0002: Escolha da Arquitetura Técnica Inicial</h1>
+<p><strong>Status:</strong> Aceito<br />
+<strong>Data:</strong> Novembro de 2026<br />
+<strong>Projeto:</strong> Rota Vital · CESAR School · ADS · 2026.2</p>
+<hr />
+<h2>Contexto</h2>
+<p>Tendo decidido pelo monolito modular (ADR 0001), precisamos escolher a stack tecnológica, o banco de dados, a estratégia de testes e a plataforma de deploy.</p>
+<p>As restrições são:
+- A equipe já domina Java 21 + Spring Boot 3.3.5, PostgreSQL, Docker, GitHub Actions e Cucumber (entregues e aprovados na Parte 1 — Mesa DJ).
+- Não há justificativa para trocar tecnologias funcionando por outras desconhecidas.
+- O sistema precisa de deploy automatizado (CI/CD), testes em múltiplos níveis e banco de dados relacional.
+- O orçamento de infraestrutura é zero (plano gratuito do Render).</p>
+<p>Alternativas consideradas:
+- <strong>Backend:</strong> Python/Django, Node.js/Express, Java/Spring Boot
+- <strong>Banco:</strong> MySQL, MongoDB, PostgreSQL, H2
+- <strong>Frontend:</strong> React, Vue.js, Thymeleaf, HTML estático
+- <strong>Deploy:</strong> Fly.io, Railway, Render, Heroku</p>
+<hr />
+<h2>Decisão</h2>
+<p>Mantemos a mesma stack da Parte 1, adaptada para o novo domínio:</p>
+<table>
+<thead>
+<tr>
+<th>Componente</th>
+<th>Escolha</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Linguagem</td>
+<td>Java 21</td>
+</tr>
+<tr>
+<td>Framework</td>
+<td>Spring Boot 3.3.5</td>
+</tr>
+<tr>
+<td>Persistência</td>
+<td>Spring Data JPA + Hibernate</td>
+</tr>
+<tr>
+<td>Banco</td>
+<td>PostgreSQL 16</td>
+</tr>
+<tr>
+<td>Migrações</td>
+<td>Flyway</td>
+</tr>
+<tr>
+<td>Testes unitários</td>
+<td>JUnit 5 + Mockito</td>
+</tr>
+<tr>
+<td>Testes de integração</td>
+<td>Testcontainers</td>
+</tr>
+<tr>
+<td>Testes BDD</td>
+<td>Cucumber (cenários Gherkin)</td>
+</tr>
+<tr>
+<td>Build</td>
+<td>Maven (mvnw wrapper)</td>
+</tr>
+<tr>
+<td>Container</td>
+<td>Docker + Docker Compose</td>
+</tr>
+<tr>
+<td>CI/CD</td>
+<td>GitHub Actions</td>
+</tr>
+<tr>
+<td>Deploy</td>
+<td>Render (plano gratuito)</td>
+</tr>
+<tr>
+<td>Frontend</td>
+<td>HTML + CSS + JavaScript (estático)</td>
+</tr>
+</tbody>
+</table>
+<p>A estrutura de pacotes segue o padrão DDD por Bounded Context: <code>br.cesar.rotavital.&lt;contexto&gt;.&lt;camada&gt;</code>.</p>
+<hr />
+<h2>Consequências</h2>
+<p><strong>O que melhora:</strong>
+- Curva de aprendizado zero — a equipe já conhece toda a stack.
+- Ambiente de desenvolvimento e produção idênticos (mesmo Dockerfile e compose).
+- Testes em três níveis já configurados e funcionando.
+- Pipeline CI/CD reutilizado e adaptado do Mesa DJ.
+- Integração natural entre Spring Boot e DDD (módulos por pacote, interfaces de repositório).</p>
+<p><strong>O que piora / riscos:</strong>
+- O frontend HTML estático é funcional, mas limita a riqueza visual do dashboard. Se a equipe quiser gráficos interativos, precisará adicionar uma biblioteca JS (Chart.js) manualmente.
+- O Render gratuito hiberna após 15 minutos de inatividade — aceitável para ambiente acadêmico.</p>
+<p><strong>Alternativas descartadas:</strong>
+- <strong>React:</strong> Adicionaria uma segunda linguagem (JavaScript/TypeScript) e um segundo pipeline de build, sem benefício proporcional para o escopo da Parte 2.
+- <strong>MongoDB:</strong> O domínio do Rota Vital tem relacionamentos fortes (bolsa ↔ alocação ↔ requisição) que se beneficiam de banco relacional. Constraints de banco (unicidade de bolsa reservada) são mais fáceis em PostgreSQL.
+- <strong>H2:</strong> Descartado pelos mesmos motivos do Mesa DJ — não captura problemas reais de SQL dialect e constraints.</p>
+</div>
+<div class="section-break">
+<h1>Cenários de Carga e Orçamento — Rota Vital</h1>
+<p><strong>Projeto:</strong> Rota Vital<br />
+<strong>Disciplina:</strong> Infraestrutura de Software · CESAR School · ADS · 2026.2<br />
+<strong>Trabalho:</strong> U2 · Parte 2 · Seção E — Três Cenários com Orçamento</p>
+<hr />
+<h2>Premissas Gerais</h2>
+<p>Antes dos cálculos, declaramos as premissas assumidas:</p>
+<table>
+<thead>
+<tr>
+<th>Premissa</th>
+<th>Valor</th>
+<th>Observação</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Horas de pico por dia</td>
+<td>8h</td>
+<td>Operação diurna (7h às 19h)</td>
+</tr>
+<tr>
+<td>Distribuição de carga</td>
+<td>60% nas horas de pico</td>
+<td>Padrão operacional hospitalar</td>
+</tr>
+<tr>
+<td>Tempo médio de processamento (W)</td>
+<td>200 ms</td>
+<td>Inclui validação, consulta ao banco e resposta</td>
+</tr>
+<tr>
+<td>Disponibilidade desejada (todos)</td>
+<td>99,5%</td>
+<td>≈ 44h de downtime/ano</td>
+</tr>
+<tr>
+<td>Leituras de telemetria por veículo</td>
+<td>1 por minuto</td>
+<td>Premissa sintética</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>⚠️ <strong>Nota sobre o W (tempo médio de processamento):</strong> O valor de 200 ms é uma premissa acadêmica. Num sistema real, seria medido com testes de carga (k6, JMeter, Gatling). Para o Rota Vital, estimamos que a consulta de compatibilidade + FEFO + gravação no banco leva entre 100 ms e 300 ms.</p>
+</blockquote>
+<hr />
+<h2>Lei de Little</h2>
+<p><strong>L = λ × W</strong></p>
+<p>Onde:
+- <strong>L</strong> = número médio de requisições em andamento simultaneamente (concorrência)
+- <strong>λ</strong> (lambda) = taxa de chegada de requisições por segundo (req/s)
+- <strong>W</strong> = tempo médio de processamento de cada requisição (segundos)</p>
+<p><strong>Como usar:</strong>
+Se o pico é de 10 req/s e cada requisição demora 0,2 s:<br />
+L = 10 × 0,2 = <strong>2 requisições em andamento ao mesmo tempo</strong></p>
+<p>Isso significa que precisamos de capacidade para processar pelo menos 2 requisições concorrentes. Se cada instância da aplicação suporta ~50 threads, <strong>1 instância é suficiente</strong> para este caso.</p>
+<hr />
+<h2>Cenário 1: Carga Baixa</h2>
+<p><strong>Perfil:</strong> Hemocentro regional atendendo 3 a 5 hospitais de pequeno porte.</p>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Usuários simultâneos</td>
+<td>10</td>
+</tr>
+<tr>
+<td>Requisições hospitalares por dia</td>
+<td>50</td>
+</tr>
+<tr>
+<td>Leituras de telemetria por dia</td>
+<td>2.880 (2 veículos × 1 leitura/min × 24h)</td>
+</tr>
+<tr>
+<td>Pico de req/s (aplicação)</td>
+<td>2 req/s</td>
+</tr>
+<tr>
+<td>Pico de req/s (telemetria)</td>
+<td>0,1 req/s</td>
+</tr>
+<tr>
+<td>Disponibilidade desejada</td>
+<td>99,5%</td>
+</tr>
+<tr>
+<td>W (tempo médio)</td>
+<td>0,2 s</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Lei de Little:</strong></p>
+<pre><code>L (aplicação)  = 2 req/s × 0,2 s = 0,4 (&lt; 1 requisição em andamento)
+L (telemetria) = 0,1 req/s × 0,2 s = 0,02
+</code></pre>
+<p><strong>Instâncias necessárias:</strong> 1 instância da aplicação (monolito) com 1 réplica.<br />
+<strong>Conexões com banco:</strong> mínimo de 5 conexões no pool (HikariCP padrão).</p>
+<h3>Diagrama — Cenário 1</h3>
+<pre><code>[ Usuários (10) ]
+       │ HTTP
+       ▼
+[ Load Balancer (opcional) ]
+       │
+       ▼
+┌─────────────────────────────┐
+│   App: 1 instância          │
+│   Spring Boot (512 MB RAM)  │
+│   1 vCPU                    │
+└──────────────┬──────────────┘
+               │ JDBC (pool: 5 conexões)
+               ▼
+┌─────────────────────────────┐
+│   PostgreSQL 16              │
+│   db.t3.micro ou similar    │
+│   1 vCPU / 1 GB RAM         │
+└─────────────────────────────┘
+</code></pre>
+<hr />
+<h2>Cenário 2: Carga Moderada</h2>
+<p><strong>Perfil:</strong> Hemocentro estadual atendendo 20 a 40 hospitais de médio porte, com telemetria de 10 veículos.</p>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Usuários simultâneos</td>
+<td>100</td>
+</tr>
+<tr>
+<td>Requisições hospitalares por dia</td>
+<td>500</td>
+</tr>
+<tr>
+<td>Leituras de telemetria por dia</td>
+<td>14.400 (10 veículos × 1 leitura/min × 24h)</td>
+</tr>
+<tr>
+<td>Pico de req/s (aplicação)</td>
+<td>15 req/s</td>
+</tr>
+<tr>
+<td>Pico de req/s (telemetria)</td>
+<td>2 req/s</td>
+</tr>
+<tr>
+<td>Disponibilidade desejada</td>
+<td>99,5%</td>
+</tr>
+<tr>
+<td>W (tempo médio)</td>
+<td>0,2 s</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Lei de Little:</strong></p>
+<pre><code>L (aplicação)  = 15 req/s × 0,2 s = 3 (3 requisições em andamento)
+L (telemetria) = 2 req/s × 0,2 s = 0,4
+L (total)      = 3,4 ≈ 4 requisições concorrentes
+</code></pre>
+<p><strong>Instâncias necessárias:</strong> 2 instâncias da aplicação (redundância + distribuição de carga).<br />
+<strong>Conexões com banco:</strong> 10 conexões por instância = 20 conexões totais (pool HikariCP configurado).</p>
+<h3>Diagrama — Cenário 2</h3>
+<pre><code>[ Usuários (100) ]
+        │ HTTPS
+        ▼
+[ Load Balancer ]
+   ┌────┴────┐
+   ▼         ▼
+┌───────┐ ┌───────┐
+│ App 1 │ │ App 2 │   2 instâncias Spring Boot
+│ 1 vCPU│ │ 1 vCPU│   1 GB RAM cada
+│ 1 GB  │ │ 1 GB  │
+└───┬───┘ └───┬───┘
+    └─────┬───┘
+          │ JDBC (pool: 10 × 2 = 20 conexões)
+          ▼
+┌──────────────────────────┐
+│   PostgreSQL 16          │
+│   db.t3.small            │
+│   2 vCPU / 2 GB RAM      │
+└──────────────────────────┘
+</code></pre>
+<hr />
+<h2>Cenário 3: Carga Alta</h2>
+<p><strong>Perfil:</strong> Hemocentro nacional ou rede de hemocentros regionais, 100+ hospitais, 50 veículos com telemetria contínua.</p>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Valor</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Usuários simultâneos</td>
+<td>500</td>
+</tr>
+<tr>
+<td>Requisições hospitalares por dia</td>
+<td>5.000</td>
+</tr>
+<tr>
+<td>Leituras de telemetria por dia</td>
+<td>72.000 (50 veículos × 1 leitura/min × 24h)</td>
+</tr>
+<tr>
+<td>Pico de req/s (aplicação)</td>
+<td>80 req/s</td>
+</tr>
+<tr>
+<td>Pico de req/s (telemetria)</td>
+<td>15 req/s</td>
+</tr>
+<tr>
+<td>Disponibilidade desejada</td>
+<td>99,9%</td>
+</tr>
+<tr>
+<td>W (tempo médio aplicação)</td>
+<td>0,2 s</td>
+</tr>
+<tr>
+<td>W (tempo médio telemetria)</td>
+<td>0,1 s</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Lei de Little:</strong></p>
+<pre><code>L (aplicação)  = 80 req/s × 0,2 s = 16 requisições em andamento
+L (telemetria) = 15 req/s × 0,1 s = 1,5 requisições em andamento
+L (total)      ≈ 18 requisições concorrentes
+</code></pre>
+<p><strong>Instâncias necessárias:</strong><br />
+- Aplicação: 4 instâncias (16 req concorrentes / ~4 req por instância com margem)<br />
+- Telemetria: 2 instâncias separadas (justificativa para extração como microsserviço)<br />
+<strong>Conexões com banco:</strong> 15 por instância × 4 instâncias = 60 conexões (app) + 15 × 2 = 30 (telemetria) = 90 conexões totais.</p>
+<h3>Diagrama — Cenário 3</h3>
+<pre><code>[ Usuários (500) ]
+        │ HTTPS
+        ▼
+[ Load Balancer ]
+   ┌────┬────┬────┐
+   ▼    ▼    ▼    ▼
+[ App1 ][ App2 ][ App3 ][ App4 ]   4 instâncias
+   2 vCPU / 2 GB RAM cada
+        │
+   ┌────┘
+   ▼
+[ Telemetria ][ Telemetria ]   2 instâncias separadas
+   1 vCPU / 1 GB RAM
+        │
+        └──────────┐
+                   ▼
+        ┌──────────────────────┐
+        │  PostgreSQL          │
+        │  db.t3.medium        │
+        │  2 vCPU / 4 GB RAM   │
+        │  (read replica para  │
+        │   telemetria)        │
+        └──────────────────────┘
+              +
+        ┌──────────────────────┐
+        │  Read Replica        │
+        │  (consultas pesadas  │
+        │   de telemetria)     │
+        └──────────────────────┘
+</code></pre>
+<hr />
+<h2>Resumo — Comparação dos Cenários</h2>
+<table>
+<thead>
+<tr>
+<th>Parâmetro</th>
+<th>Cenário 1 (Baixo)</th>
+<th>Cenário 2 (Moderado)</th>
+<th>Cenário 3 (Alto)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Usuários simultâneos</td>
+<td>10</td>
+<td>100</td>
+<td>500</td>
+</tr>
+<tr>
+<td>Req/dia</td>
+<td>50</td>
+<td>500</td>
+<td>5.000</td>
+</tr>
+<tr>
+<td>Pico (req/s)</td>
+<td>2</td>
+<td>15</td>
+<td>80</td>
+</tr>
+<tr>
+<td>L (concorrência)</td>
+<td>0,4</td>
+<td>3,4</td>
+<td>18</td>
+</tr>
+<tr>
+<td>Instâncias app</td>
+<td>1</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>Instâncias telemetria</td>
+<td>—</td>
+<td>—</td>
+<td>2</td>
+</tr>
+<tr>
+<td>Conexões banco</td>
+<td>5</td>
+<td>20</td>
+<td>90</td>
+</tr>
+<tr>
+<td>Disponibilidade</td>
+<td>99,5%</td>
+<td>99,5%</td>
+<td>99,9%</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2>Orçamento Estimado</h2>
+<blockquote>
+<p>⚠️ <strong>IMPORTANTE:</strong> Os preços abaixo são estimativas baseadas em pesquisa de preços on-demand de provedores de nuvem. Preços mudam com frequência. Consulte sempre os calculadores oficiais antes de tomar decisões. Os valores estão em <strong>dólar americano (USD)</strong>, região <strong>us-east-1 (AWS)</strong> / <strong>East US (Azure)</strong>.</p>
+<p><strong>Esta seção requer validação com preços atuais dos provedores.</strong> A equipe deve acessar os calculadores oficiais e atualizar os valores com a data de consulta.</p>
+</blockquote>
+<h3>Calculadores oficiais</h3>
+<ul>
+<li>AWS Pricing Calculator: https://calculator.aws/pricing/2/home</li>
+<li>Azure Pricing Calculator: https://azure.microsoft.com/pt-br/pricing/calculator/</li>
+<li>Google Cloud Pricing Calculator: https://cloud.google.com/products/calculator</li>
+<li>Render Pricing: https://render.com/pricing</li>
+</ul>
+<h3>Referência de Preços (a consultar e validar)</h3>
+<table>
+<thead>
+<tr>
+<th>Serviço</th>
+<th>Cenário 1</th>
+<th>Cenário 2</th>
+<th>Cenário 3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>App (instâncias EC2/ECS)</td>
+<td>t3.micro × 1</td>
+<td>t3.small × 2</td>
+<td>t3.medium × 4</td>
+</tr>
+<tr>
+<td>Banco (RDS PostgreSQL)</td>
+<td>db.t3.micro</td>
+<td>db.t3.small</td>
+<td>db.t3.medium + read replica</td>
+</tr>
+<tr>
+<td>Load Balancer</td>
+<td>—</td>
+<td>ALB</td>
+<td>ALB</td>
+</tr>
+<tr>
+<td>Transferência de dados</td>
+<td>Mínima</td>
+<td>Moderada</td>
+<td>Alta</td>
+</tr>
+<tr>
+<td><strong>Custo mensal estimado</strong></td>
+<td><strong>~$20/mês</strong></td>
+<td><strong>~$120/mês</strong></td>
+<td><strong>~$500/mês</strong></td>
+</tr>
+<tr>
+<td><strong>Custo por pedido</strong></td>
+<td>~$0,013</td>
+<td>~$0,008</td>
+<td>~$0,003</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Nota:</strong> Os valores acima são estimativas de referência com base em preços AWS on-demand de 2024/2025. A equipe deve consultar o AWS Pricing Calculator com as configurações exatas e registrar a data da consulta aqui.</p>
+<p><strong>Data de consulta:</strong> <strong><em>/</em></strong>/2026 (a preencher pela equipe)<br />
+<strong>Fonte:</strong> AWS Pricing Calculator — us-east-1<br />
+<strong>Observação:</strong> Preços on-demand, sem reserva de instância. Com Reserved Instances (1 ano), o custo pode ser reduzido em ~30%.</p>
+</blockquote>
+<h3>Alternativa PaaS — Render.com</h3>
+<p>Para o ambiente acadêmico (Cenário 1 e 2), o Render oferece:
+- <strong>Plano gratuito:</strong> 1 serviço web + 1 banco PostgreSQL (90 dias). Adequado para demo.
+- <strong>Starter ($7/mês):</strong> 1 serviço sempre ativo + banco PostgreSQL ($7/mês). Adequado para Cenário 1.
+- <strong>Standard ($25/mês por serviço):</strong> Adequado para Cenário 2 com 2 instâncias.</p>
+<blockquote>
+<p>Fonte: https://render.com/pricing (consultar para data atual)</p>
+</blockquote>
+<hr />
+<h2>Referências</h2>
+<ul>
+<li>NYGARD, M. <em>Documenting Architecture Decisions</em>, 2011.</li>
+<li>AWS Pricing: https://aws.amazon.com/pricing/</li>
+<li>Render Pricing: https://render.com/pricing</li>
+<li>Lei de Little: LITTLE, J.D.C. <em>A Proof for the Queuing Formula: L = λW</em>, 1961.</li>
+<li>Slides das aulas 006 e 007 — Infraestrutura de Software · CESAR School · 2026.2</li>
+</ul>
+</div>
+<div class="section-break">
+<h1>Orçamento — Dimensionamento e Custos de Infraestrutura</h1>
+<p><strong>Projeto:</strong> Rota Vital — Gestão Logística de Hemocomponentes<br />
+<strong>Disciplina:</strong> Infraestrutura de Software · CESAR School · ADS · 2026.2<br />
+<strong>Trabalho:</strong> U2 · Parte 2 · Seção E — Orçamento</p>
+<hr />
+<h2>1. Premissas de Consulta</h2>
+<ul>
+<li><strong>Provedor:</strong> Amazon Web Services (AWS) e Render PaaS</li>
+<li><strong>Região:</strong> us-east-1 (N. Virginia)</li>
+<li><strong>Modalidade:</strong> Preços On-Demand em dólar (USD)</li>
+<li><strong>Data da Consulta:</strong> 10 de Novembro de 2026</li>
+<li><strong>Fonte Oficial:</strong> AWS Pricing Calculator (calculator.aws) e Render Pricing</li>
+</ul>
+<hr />
+<h2>2. Cenário 1 — Carga Baixa (Operação Regional / 3 a 5 Hospitais)</h2>
+<ul>
+<li><strong>Volume:</strong> 50 pedidos/dia (1.500/mês) | 10 usuários simultâneos | Pico: 2 req/s</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Componente / Recurso</th>
+<th style="text-align: left;">Especificação</th>
+<th style="text-align: center;">Qtd</th>
+<th style="text-align: center;">Preço Unitário</th>
+<th style="text-align: center;">Custo Mensal (USD)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>AWS ECS Fargate (Aplicação)</strong></td>
+<td style="text-align: left;">0.25 vCPU, 0.5 GB RAM (730h)</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">$0.0125/hora</td>
+<td style="text-align: center;">$9.13</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>AWS RDS PostgreSQL</strong></td>
+<td style="text-align: left;">db.t3.micro (Single-AZ, 1 vCPU, 1 GB)</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">$0.0180/hora</td>
+<td style="text-align: center;">$13.14</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Armazenamento RDS</strong></td>
+<td style="text-align: left;">General Purpose SSD (gp3) - 20 GB</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">$0.115/GB-mês</td>
+<td style="text-align: center;">$2.30</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Data Transfer Out</strong></td>
+<td style="text-align: left;">Transferência de dados (~10 GB/mês)</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">Primeiros 100 GB Free</td>
+<td style="text-align: center;">$0.00</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Total Mensal AWS (Cenário 1)</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>$24.57</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Custo por Pedido (AWS):</strong> $24.57 ÷ 1.500 pedidos = <strong>$0.0164 (aprox. 1,6 centavos de dólar por bolsa/pedido)</strong></p>
+</blockquote>
+<h3>Alternativa em PaaS (Render)</h3>
+<ul>
+<li>Web Service Starter: $7.00/mês</li>
+<li>PostgreSQL Starter (1 GB RAM / 10 GB SSD): $7.00/mês</li>
+<li><strong>Total Render Cenário 1:</strong> <strong>$14.00/mês</strong> ($0.0093 por pedido)</li>
+</ul>
+<hr />
+<h2>3. Cenário 2 — Carga Moderada (Estadual / 20 a 40 Hospitais)</h2>
+<ul>
+<li><strong>Volume:</strong> 500 pedidos/dia (15.000/mês) | 100 usuários simultâneos | Pico: 15 req/s</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Componente / Recurso</th>
+<th style="text-align: left;">Especificação</th>
+<th style="text-align: center;">Qtd</th>
+<th style="text-align: center;">Preço Unitário</th>
+<th style="text-align: center;">Custo Mensal (USD)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>AWS ECS Fargate (Aplicação)</strong></td>
+<td style="text-align: left;">0.5 vCPU, 1 GB RAM (730h)</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">$0.0250/hora</td>
+<td style="text-align: center;">$36.50</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>AWS Application Load Balancer</strong></td>
+<td style="text-align: left;">1 ALB (~15 LCU consumidos)</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">$0.0225/hora + LCU</td>
+<td style="text-align: center;">$22.50</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>AWS RDS PostgreSQL</strong></td>
+<td style="text-align: left;">db.t3.small (Single-AZ, 2 vCPU, 2 GB)</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">$0.0360/hora</td>
+<td style="text-align: center;">$26.28</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Armazenamento RDS</strong></td>
+<td style="text-align: left;">General Purpose SSD (gp3) - 60 GB</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">$0.115/GB-mês</td>
+<td style="text-align: center;">$6.90</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Data Transfer Out</strong></td>
+<td style="text-align: left;">Transferência de dados (~50 GB/mês)</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">Free tier (&lt;100 GB)</td>
+<td style="text-align: center;">$0.00</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Total Mensal AWS (Cenário 2)</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>$92.18</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Custo por Pedido (AWS):</strong> $92.18 ÷ 15.000 pedidos = <strong>$0.0061 (aprox. 0,6 centavos de dólar por pedido)</strong></p>
+</blockquote>
+<hr />
+<h2>4. Cenário 3 — Carga Alta (Rede Nacional / 100+ Hospitais + Telemetria Contínua)</h2>
+<ul>
+<li><strong>Volume:</strong> 5.000 pedidos/dia (150.000/mês) | 500 usuários simultâneos | Pico: 95 req/s (App + Telemetria)</li>
+</ul>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Componente / Recurso</th>
+<th style="text-align: left;">Especificação</th>
+<th style="text-align: center;">Qtd</th>
+<th style="text-align: center;">Preço Unitário</th>
+<th style="text-align: center;">Custo Mensal (USD)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>AWS ECS Fargate (Core App)</strong></td>
+<td style="text-align: left;">1.0 vCPU, 2 GB RAM (730h)</td>
+<td style="text-align: center;">4</td>
+<td style="text-align: center;">$0.0499/hora</td>
+<td style="text-align: center;">$145.71</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>AWS ECS Fargate (Telemetria)</strong></td>
+<td style="text-align: left;">0.5 vCPU, 1 GB RAM (730h)</td>
+<td style="text-align: center;">2</td>
+<td style="text-align: center;">$0.0250/hora</td>
+<td style="text-align: center;">$36.50</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>AWS Application Load Balancer</strong></td>
+<td style="text-align: left;">1 ALB com roteamento de path</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">$0.0225/hora + LCU</td>
+<td style="text-align: center;">$35.00</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>AWS RDS PostgreSQL (Master)</strong></td>
+<td style="text-align: left;">db.t3.medium (Multi-AZ, 2 vCPU, 4 GB)</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">$0.1440/hora</td>
+<td style="text-align: center;">$105.12</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>AWS RDS Read Replica</strong></td>
+<td style="text-align: left;">db.t3.medium (Single-AZ, réplica telemetria)</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">$0.0720/hora</td>
+<td style="text-align: center;">$52.56</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Armazenamento RDS</strong></td>
+<td style="text-align: left;">General Purpose SSD (gp3) - 250 GB</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">$0.115/GB-mês</td>
+<td style="text-align: center;">$28.75</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Data Transfer Out</strong></td>
+<td style="text-align: left;">Transferência de dados (~250 GB/mês)</td>
+<td style="text-align: center;">1</td>
+<td style="text-align: center;">150 GB cobrados ($0.09)</td>
+<td style="text-align: center;">$13.50</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>Total Mensal AWS (Cenário 3)</strong></td>
+<td style="text-align: left;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"></td>
+<td style="text-align: center;"><strong>$417.14</strong></td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p><strong>Custo por Pedido (AWS):</strong> $417.14 ÷ 150.000 pedidos = <strong>$0.0027 (aprox. 0,27 centavos de dólar por pedido)</strong></p>
+</blockquote>
+<hr />
+<h2>5. Resumo Consolidado de Custos</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left;">Cenário</th>
+<th style="text-align: center;">Pedidos/mês</th>
+<th style="text-align: center;">Instâncias App</th>
+<th style="text-align: center;">Banco de Dados</th>
+<th style="text-align: center;">Custo Mensal (USD)</th>
+<th style="text-align: center;">Custo / Pedido (USD)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align: left;"><strong>1 — Baixo</strong></td>
+<td style="text-align: center;">1.500</td>
+<td style="text-align: center;">1x ECS (0.25 vCPU)</td>
+<td style="text-align: center;">db.t3.micro (Single)</td>
+<td style="text-align: center;"><strong>$24.57</strong></td>
+<td style="text-align: center;">$0.0164</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>2 — Moderado</strong></td>
+<td style="text-align: center;">15.000</td>
+<td style="text-align: center;">2x ECS + ALB</td>
+<td style="text-align: center;">db.t3.small (Single)</td>
+<td style="text-align: center;"><strong>$92.18</strong></td>
+<td style="text-align: center;">$0.0061</td>
+</tr>
+<tr>
+<td style="text-align: left;"><strong>3 — Alto</strong></td>
+<td style="text-align: center;">150.000</td>
+<td style="text-align: center;">6x ECS + ALB</td>
+<td style="text-align: center;">db.t3.medium (Multi-AZ + Replica)</td>
+<td style="text-align: center;"><strong>$417.14</strong></td>
+<td style="text-align: center;">$0.0027</td>
+</tr>
+</tbody>
+</table>
+<h3>Observações sobre Otimização de Custos</h3>
+<ol>
+<li><strong>Economia de Escala:</strong> Conforme o volume aumenta de 1.500 para 150.000 pedidos, o custo por pedido cai de $0.0164 para $0.0027 (redução de mais de 80%), diluindo a infraestrutura base.</li>
+<li><strong>Savings Plans &amp; Instâncias Reservadas:</strong> Contratos de 1 ou 3 anos com a AWS reduzem os custos de ECS e RDS entre 28% e 38% em relação aos valores on-demand listados.</li>
+</ol>
+</div>
+</body>
+</html>
