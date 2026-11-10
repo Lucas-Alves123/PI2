@@ -4,7 +4,7 @@
 **Disciplina:** Infraestrutura de Software · CESAR School · ADS · 2026.2  
 **Trabalho:** U2 · Parte 2
 
-Estes diagramas estão em formato Mermaid. Você pode visualizá-los diretamente no GitHub, no VS Code / Antigravity ou exportá-los em imagem / PDF para o relatório final e slides da apresentação.
+Estes diagramas estão em formato Mermaid. Você pode visualizá-los diretamente no GitHub, no VS Code ou exportá-los em imagem para o relatório final.
 
 ---
 
