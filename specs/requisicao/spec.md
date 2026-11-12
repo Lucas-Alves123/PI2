@@ -1,47 +1,46 @@
 # Spec: Alocar bolsa compatível (contexto Requisição)
 
 ## Objetivo
-Permitir que o atendente hospitalar registre uma requisição de hemocomponentes para um hospital e que o sistema selecione e aloque automaticamente as bolsas compatíveis disponíveis no estoque, priorizando rigorosamente as bolsas com data de validade mais próxima de expirar (política First-Expired, First-Out — FEFO).
+Permitir que o atendente registre uma requisição de hemocomponentes para um hospital e que o sistema aloque automaticamente as bolsas compatíveis disponíveis no estoque, priorizando as que vencem primeiro (FEFO).
 
-## Linguagem Ubíqua
-- **Hospital:** Instituição de saúde solicitante cadastrada no sistema.
-- **Requisição:** Agregado que formaliza o pedido de hemocomponentes com tipo ABO/Rh, quantidade e urgência.
-- **Alocação:** Vínculo interno da requisição com uma bolsa física reservada.
-- **Bolsa:** Unidade física de hemocomponente armazenada no estoque com código, tipo sanguíneo e validade.
-- **TipoSanguineo:** Objeto de valor composto por TipoAbo (A, B, AB, O) e TipoRh (+, -).
-- **Validade:** Objeto de valor que encapsula a data de vencimento da bolsa e suas regras de expiração.
-- **FEFO (First-Expired, First-Out):** Critério de ordenação prioritária por menor data de validade.
+## Linguagem
+- **Hospital:** instituição de saúde solicitante cadastrada no sistema.
+- **Requisição:** agregado que representa o pedido de hemocomponentes (tipo ABO/Rh, quantidade e urgência).
+- **Alocação:** entidade interna da requisição que vincula uma bolsa reservada ao pedido.
+- **Bolsa:** unidade de hemocomponente armazenada no estoque com código, tipo sanguíneo e validade.
+- **TipoSanguineo:** objeto de valor imutável com `TipoAbo` e `TipoRh`.
+- **Validade:** objeto de valor imutável que guarda a data de vencimento da bolsa e verifica expiração.
+- **FEFO:** critério de seleção que prioriza a bolsa com menor data de validade.
 
-## Regras e Invariantes do Agregado
-1. **Invariante de Quantidade:** Uma requisição não pode aceitar alocações além da quantidade total solicitada.
-2. **Invariante de Unicidade:** Uma mesma bolsa física não pode ser vinculada mais de uma vez à mesma requisição.
-3. **Invariante de Validade:** Nenhuma bolsa com data de validade expirada pode ser alocada.
-4. **Invariante de Compatibilidade:** Toda bolsa alocada deve ser estritamente compatível pelo padrão imunematológico ABO/Rh para o hemocomponente requisitado.
-5. **Invariante de Transição de Estado:**
-   - Ao criar a requisição: status inicial `PENDENTE`.
-   - Com alocações parciais: status `PARCIALMENTE_ATENDIDA`.
-   - Com todas as cotas supridas: status `ATENDIDA`.
-   - Requisições em status `CANCELADA` ou `CONCLUIDA` rejeitam novas alocações.
-   - O avanço para `EM_EXPEDICAO` exige que o status prévio seja `ATENDIDA`.
+## Regras
+1. Uma requisição não aceita mais alocações do que a quantidade solicitada.
+2. Uma mesma bolsa não pode ser vinculada mais de uma vez à mesma requisição.
+3. Bolsas vencidas não podem ser alocadas.
+4. Toda bolsa alocada precisa ser compatível em ABO/Rh para o componente solicitado.
+5. Status da requisição conforme atendimento:
+   - Criada como `PENDENTE`.
+   - Com atendimento incompleto, fica `PARCIALMENTE_ATENDIDA`.
+   - Quando atinge a quantidade pedida, passa para `ATENDIDA`.
+   - Requisições `CANCELADA`, `EM_EXPEDICAO` ou `CONCLUIDA` não aceitam novas alocações.
+   - Só avança para `EM_EXPEDICAO` se estiver `ATENDIDA`, e só conclui se estiver `EM_EXPEDICAO`.
 
-## Critérios de Aceite (Gherkin / BDD)
-- **CA1 (FEFO):** Dado que existem múltiplas bolsas compatíveis no estoque com validades distintas, quando a requisição for processada, a bolsa com data de validade mais próxima deve ser reservada primeiro.
-- **CA2 (Incompatibilidade):** Quando houver apenas bolsas de tipo sanguíneo incompatível no estoque, nenhuma alocação deve ser realizada e a requisição deve permanecer `PENDENTE`.
-- **CA3 (Alocação Parcial):** Quando o estoque possuir menos bolsas compatíveis do que a quantidade solicitada, o sistema aloca as disponíveis e transiciona o status para `PARCIALMENTE_ATENDIDA`.
+## Critérios
+- **CA1 (FEFO):** Dado que há bolsas compatíveis com validades diferentes, quando a requisição é registrada, a bolsa que vence mais cedo é alocada primeiro.
+- **CA2 (Incompatibilidade):** Quando só existem bolsas incompatíveis no estoque, nenhuma bolsa é alocada e a requisição segue `PENDENTE`.
+- **CA3 (Atendimento parcial):** Quando há menos bolsas compatíveis do que o total solicitado, o sistema aloca o que estiver disponível e deixa a requisição como `PARCIALMENTE_ATENDIDA`.
 
-## Eventos de Domínio
-- **RequisicaoAtendidaEvent:** Publicado quando a requisição atinge o status `ATENDIDA` (todas as cotas alocadas). Consumido assincronamente pelo contexto de Expedição para preparação da Guia de Expedição.
+## Eventos
+- `RequisicaoAtendida`: publicado pelo contexto de Requisição quando o pedido é totalmente atendido e consumido pelo contexto de Notificação.
+- `GuiaEntregue`: publicado pelo contexto de Expedição na entrega e consumido por Requisição e Notificação.
 
-## Fora do Escopo
-- Gestão de rotas de transporte e telemetria de veículos (pertencente ao contexto Expedição e Telemetria).
-- Triagem clínica de doadores e coleta externa (pertencente a sistemas legados de hemocentro).
+## Fora do escopo
+- Roteirização de frota externa.
+- Triagem clínica de doadores e coleta.
 
-## Tarefas de Implementação
-- [x] Criar especificação SDD guiando a modelagem do domínio.
-- [x] Implementar Value Object imutável `Validade` com validações no construtor.
-- [x] Escrever testes unitários TDD verificando rejeição de alocação excessiva e validade expirada (Ciclo Vermelho).
-- [x] Refatorar agregado `Requisicao` e entidade `Bolsa` para proteger as invariantes (Ciclo Verde).
-- [x] Implementar desacoplamento entre contextos através de interfaces públicas (`EstoqueService`).
-- [x] Publicar evento de domínio `RequisicaoAtendida` e consumidor nos contextos de Expedição/Notificação.
-- [x] Mover controllers web para os pacotes de apresentação de seus respectivos contextos e validar com ArchUnit.
-
+## Tarefas
+- [x] Especificação funcional do fluxo de alocação.
+- [x] Objeto de valor imutável `Validade` com validação no construtor.
+- [x] Testes unitários do agregado `Requisicao` e do VO `Validade` (ciclo vermelho).
+- [x] Implementação das invariantes na raiz `Requisicao` e na `Bolsa` (ciclo verde).
+- [x] Isolamento entre contextos por serviços de aplicação e eventos de domínio.
+- [x] Validação das camadas com ArchUnit e execução dos cenários no Cucumber.

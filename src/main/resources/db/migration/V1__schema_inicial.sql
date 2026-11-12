@@ -1,6 +1,3 @@
--- ============================================================
--- V1 — Hospitais e Unidades Solicitantes
--- ============================================================
 CREATE TABLE hospital (
     id          BIGSERIAL PRIMARY KEY,
     nome        VARCHAR(150) NOT NULL,
@@ -22,9 +19,6 @@ CREATE TABLE unidade (
     ativa       BOOLEAN      NOT NULL DEFAULT TRUE
 );
 
--- ============================================================
--- V1 — Usuários e Perfis (Identidade)
--- ============================================================
 CREATE TYPE perfil_usuario AS ENUM (
     'ADMINISTRADOR', 'ESTOQUE', 'ATENDIMENTO', 'EXPEDICAO'
 );
@@ -40,9 +34,6 @@ CREATE TABLE usuario (
     criado_em    TIMESTAMPTZ    NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
--- V1 — Estoque de Hemocomponentes
--- ============================================================
 CREATE TYPE tipo_abo AS ENUM ('A', 'B', 'AB', 'O');
 CREATE TYPE tipo_rh  AS ENUM ('POSITIVO', 'NEGATIVO');
 CREATE TYPE componente AS ENUM ('CH', 'PFC', 'CP', 'CRIO');
@@ -68,9 +59,6 @@ CREATE TABLE bolsa (
 
 CREATE INDEX idx_bolsa_status_tipo ON bolsa(status, abo, rh, componente, data_validade);
 
--- ============================================================
--- V1 — Requisições e Alocações
--- ============================================================
 CREATE TYPE urgencia AS ENUM ('ROTINA', 'URGENCIA', 'EMERGENCIA');
 CREATE TYPE status_requisicao AS ENUM (
     'PENDENTE', 'EM_ANALISE', 'PARCIALMENTE_ATENDIDA',
@@ -101,14 +89,10 @@ CREATE TABLE alocacao (
     status          status_alocacao   NOT NULL DEFAULT 'RESERVADA',
     alocado_em      TIMESTAMPTZ       NOT NULL DEFAULT NOW(),
 
-    -- garante que a mesma bolsa não pode estar em duas alocações RESERVADA/CONFIRMADA
     CONSTRAINT bolsa_unica_ativa UNIQUE (bolsa_id)
         DEFERRABLE INITIALLY DEFERRED
 );
 
--- ============================================================
--- V1 — Expedição
--- ============================================================
 CREATE TYPE status_expedicao AS ENUM (
     'PREPARANDO', 'EM_TRANSITO', 'ENTREGUE', 'CANCELADA'
 );
@@ -139,9 +123,6 @@ CREATE TABLE guia_bolsa (
     PRIMARY KEY (guia_id, bolsa_id)
 );
 
--- ============================================================
--- V1 — Telemetria
--- ============================================================
 CREATE TABLE leitura_telemetria (
     id          BIGSERIAL   PRIMARY KEY,
     guia_id     BIGINT      REFERENCES guia_expedicao(id),
@@ -155,9 +136,6 @@ CREATE TABLE leitura_telemetria (
 
 CREATE INDEX idx_telemetria_guia ON leitura_telemetria(guia_id, lido_em DESC);
 
--- ============================================================
--- V1 — Notificações internas
--- ============================================================
 CREATE TYPE tipo_notificacao AS ENUM (
     'NOVA_REQUISICAO', 'REQUISICAO_ATENDIDA', 'BOLSA_VENCENDO',
     'BOLSA_VENCIDA', 'EXPEDICAO_INICIADA', 'ENTREGA_CONCLUIDA',
@@ -173,9 +151,6 @@ CREATE TABLE notificacao (
     criada_em   TIMESTAMPTZ        NOT NULL DEFAULT NOW()
 );
 
--- ============================================================
--- V1 — Dados sintéticos iniciais
--- ============================================================
 INSERT INTO hospital (nome, cnpj, logradouro, cidade, estado, telefone, email, responsavel) VALUES
 ('Hospital das Clínicas Fictício',   '00.000.001/0001-01', 'Av. Dr. Enéas de Carvalho, 155', 'Recife',   'PE', '(81) 3000-0001', 'hcf@exemplo.com',   'Dra. Marina Fonseca'),
 ('UPA Central Sintética',            '00.000.002/0001-02', 'Rua da Esperança, 220',           'Olinda',   'PE', '(81) 3000-0002', 'upa@exemplo.com',   'Dr. Carlos Melo'),
@@ -193,28 +168,25 @@ INSERT INTO veiculo (placa, modelo) VALUES
 ('XYZ-9E87', 'Sprinter Isotérmica'),
 ('QRS-4F56', 'VW Delivery Refrigerado');
 
--- senha: admin123 (BCrypt)
 INSERT INTO usuario (login, senha_hash, nome, email, perfil) VALUES
-('admin',    '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Administrador',           'admin@rotavital.local',     'ADMINISTRADOR'),
-('estoque1', '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Ana Silva — Estoque',     'estoque@rotavital.local',   'ESTOQUE'),
-('atend1',   '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Bruno Lima — Atendimento','atend@rotavital.local',     'ATENDIMENTO'),
-('exped1',   '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Carla Mota — Expedição',  'expedicao@rotavital.local', 'EXPEDICAO');
+('admin',    '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Administrador',            'admin@rotavital.local',     'ADMINISTRADOR'),
+('estoque1', '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Ana Silva - Estoque',      'estoque@rotavital.local',   'ESTOQUE'),
+('atend1',   '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Bruno Lima - Atendimento', 'atend@rotavital.local',     'ATENDIMENTO'),
+('exped1',   '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Carla Mota - Expedição',   'expedicao@rotavital.local', 'EXPEDICAO');
 
--- Bolsas sintéticas de estoque
 INSERT INTO bolsa (codigo, abo, rh, componente, data_coleta, data_validade, localizacao, status) VALUES
-('RV-2026-00001', 'O',  'NEGATIVO',  'CH',   '2026-10-01', '2026-11-12', 'Prateleira A1', 'DISPONIVEL'),
-('RV-2026-00002', 'O',  'POSITIVO',  'CH',   '2026-10-05', '2026-11-20', 'Prateleira A1', 'DISPONIVEL'),
-('RV-2026-00003', 'O',  'POSITIVO',  'CH',   '2026-10-10', '2026-11-25', 'Prateleira A1', 'DISPONIVEL'),
-('RV-2026-00004', 'A',  'POSITIVO',  'CH',   '2026-10-08', '2026-11-18', 'Prateleira A2', 'DISPONIVEL'),
-('RV-2026-00005', 'A',  'NEGATIVO',  'CH',   '2026-10-12', '2026-11-22', 'Prateleira A2', 'DISPONIVEL'),
-('RV-2026-00006', 'B',  'POSITIVO',  'CH',   '2026-10-15', '2026-11-28', 'Prateleira A3', 'DISPONIVEL'),
-('RV-2026-00007', 'B',  'NEGATIVO',  'CH',   '2026-10-20', '2026-12-01', 'Prateleira A3', 'DISPONIVEL'),
-('RV-2026-00008', 'AB', 'POSITIVO',  'CH',   '2026-10-22', '2026-12-05', 'Prateleira A4', 'DISPONIVEL'),
+('RV-2026-00001', 'O',  'NEGATIVO',  'CH',   '2026-11-10', '2026-12-18', 'Prateleira A1', 'DISPONIVEL'),
+('RV-2026-00002', 'O',  'POSITIVO',  'CH',   '2026-11-12', '2026-12-20', 'Prateleira A1', 'DISPONIVEL'),
+('RV-2026-00003', 'O',  'POSITIVO',  'CH',   '2026-11-15', '2026-12-25', 'Prateleira A1', 'DISPONIVEL'),
+('RV-2026-00004', 'A',  'POSITIVO',  'CH',   '2026-11-10', '2026-12-19', 'Prateleira A2', 'DISPONIVEL'),
+('RV-2026-00005', 'A',  'NEGATIVO',  'CH',   '2026-11-12', '2026-12-22', 'Prateleira A2', 'DISPONIVEL'),
+('RV-2026-00006', 'B',  'POSITIVO',  'CH',   '2026-11-15', '2026-12-28', 'Prateleira A3', 'DISPONIVEL'),
+('RV-2026-00007', 'B',  'NEGATIVO',  'CH',   '2026-11-20', '2027-01-05', 'Prateleira A3', 'DISPONIVEL'),
+('RV-2026-00008', 'AB', 'POSITIVO',  'CH',   '2026-11-22', '2027-01-10', 'Prateleira A4', 'DISPONIVEL'),
 ('RV-2026-00009', 'O',  'POSITIVO',  'PFC',  '2026-09-01', '2027-03-01', 'Freezer B1',   'DISPONIVEL'),
 ('RV-2026-00010', 'A',  'POSITIVO',  'PFC',  '2026-09-05', '2027-03-05', 'Freezer B1',   'DISPONIVEL'),
-('RV-2026-00011', 'O',  'POSITIVO',  'CP',   '2026-11-01', '2026-11-06', 'Prateleira C1', 'DISPONIVEL'),
-('RV-2026-00012', 'A',  'POSITIVO',  'CP',   '2026-11-02', '2026-11-07', 'Prateleira C1', 'DISPONIVEL'),
-('RV-2026-00013', 'O',  'NEGATIVO',  'CH',   '2026-10-01', '2026-11-08', 'Prateleira A1', 'DISPONIVEL'),
+('RV-2026-00011', 'O',  'POSITIVO',  'CP',   '2026-11-25', '2026-12-06', 'Prateleira C1', 'DISPONIVEL'),
+('RV-2026-00012', 'A',  'POSITIVO',  'CP',   '2026-11-26', '2026-12-07', 'Prateleira C1', 'DISPONIVEL'),
+('RV-2026-00013', 'O',  'NEGATIVO',  'CH',   '2026-11-05', '2026-12-12', 'Prateleira A1', 'DISPONIVEL'),
 ('RV-2026-00014', 'O',  'POSITIVO',  'CRIO', '2026-09-10', '2027-09-10', 'Freezer B2',   'DISPONIVEL'),
-('RV-2026-00015', 'AB', 'NEGATIVO',  'CH',   '2026-10-25', '2026-12-10', 'Prateleira A4', 'DISPONIVEL');
-
+('RV-2026-00015', 'AB', 'NEGATIVO',  'CH',   '2026-11-25', '2027-01-12', 'Freezer A4',   'DISPONIVEL');

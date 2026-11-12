@@ -23,34 +23,23 @@ public final class TipoSanguineo {
         return rh;
     }
 
-    /**
-     * Verifica compatibilidade sintética para hemocomponentes.
-     * Regra sintética documentada para fins acadêmicos.
-     */
     public boolean podeDoarPara(TipoSanguineo receptor, Componente componente) {
         if (componente == Componente.CH) {
             return compatibilidadeHemacias(receptor);
         }
-        // Para outros componentes sintetizamos compatibilidade idêntica ou universal
         return this.abo == receptor.abo;
     }
 
     private boolean compatibilidadeHemacias(TipoSanguineo receptor) {
-        // Regra do fator Rh: negativo pode doar para positivo e negativo; positivo só para positivo
         if (this.rh == TipoRh.POSITIVO && receptor.rh == TipoRh.NEGATIVO) {
             return false;
         }
-
-        // Regra ABO para concentrado de hemácias:
-        // O é doador universal
         if (this.abo == TipoAbo.O) {
             return true;
         }
-        // AB é receptor universal
         if (receptor.abo == TipoAbo.AB) {
             return true;
         }
-        // Tipos iguais
         return this.abo == receptor.abo;
     }
 
@@ -72,4 +61,3 @@ public final class TipoSanguineo {
         return abo.name() + (rh == TipoRh.POSITIVO ? "+" : "-");
     }
 }
-

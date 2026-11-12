@@ -34,7 +34,6 @@ class CompatibilidadeTest {
     @Test
     void abPositivoSoDeveReceberAbPositivo() {
         TipoSanguineo receptor = new TipoSanguineo(TipoAbo.AB, TipoRh.POSITIVO);
-        // qualquer tipo pode doar para AB+
         assertThat(new TipoSanguineo(TipoAbo.A, TipoRh.NEGATIVO).podeDoarPara(receptor, Componente.CH)).isTrue();
         assertThat(new TipoSanguineo(TipoAbo.B, TipoRh.POSITIVO).podeDoarPara(receptor, Componente.CH)).isTrue();
         assertThat(new TipoSanguineo(TipoAbo.O, TipoRh.NEGATIVO).podeDoarPara(receptor, Componente.CH)).isTrue();

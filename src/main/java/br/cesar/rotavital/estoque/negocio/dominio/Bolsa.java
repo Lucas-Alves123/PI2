@@ -105,7 +105,6 @@ public class Bolsa {
         return new TipoSanguineo(abo, rh);
     }
 
-    // Getters
     public Long getId() { return id; }
     public String getCodigo() { return codigo; }
     public TipoAbo getAbo() { return abo; }

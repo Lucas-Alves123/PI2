@@ -44,7 +44,7 @@ class BolsaTest {
     void deveDetectarBolsaVencida() {
         Bolsa bolsa = new Bolsa("RV-VENC-001", TipoAbo.A, TipoRh.NEGATIVO, Componente.PFC,
                 LocalDate.now().minusDays(50),
-                LocalDate.now().minusDays(1), // vencida ontem
+                LocalDate.now().minusDays(1),
                 "Freezer B1");
         assertThat(bolsa.estaVencida(LocalDate.now())).isTrue();
     }

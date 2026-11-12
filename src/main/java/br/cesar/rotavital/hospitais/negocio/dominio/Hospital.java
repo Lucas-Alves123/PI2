@@ -73,7 +73,6 @@ public class Hospital {
     public void desativar() { this.ativo = false; }
     public void ativar() { this.ativo = true; }
 
-    // Getters
     public Long getId() { return id; }
     public String getNome() { return nome; }
     public String getCnpj() { return cnpj; }

@@ -176,7 +176,6 @@ public class Requisicao {
         return new TipoSanguineo(aboSolicitado, rhSolicitado);
     }
 
-    // Getters
     public Long getId() { return id; }
     public Long getHospitalId() { return hospitalId; }
     public Long getUnidadeId() { return unidadeId; }
