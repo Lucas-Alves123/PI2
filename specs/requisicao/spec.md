@@ -38,10 +38,10 @@ Permitir que o atendente hospitalar registre uma requisição de hemocomponentes
 
 ## Tarefas de Implementação
 - [x] Criar especificação SDD guiando a modelagem do domínio.
-- [ ] Implementar Value Object imutável `Validade` com validações no construtor.
-- [ ] Escrever testes unitários TDD verificando rejeição de alocação excessiva e validade expirada (Ciclo Vermelho).
-- [ ] Refatorar agregado `Requisicao` e entidade `Bolsa` para proteger as invariantes (Ciclo Verde).
-- [ ] Implementar desacoplamento entre contextos através de interfaces públicas (`EstoquePublicService`).
-- [ ] Publicar evento de domínio `RequisicaoAtendidaEvent` e consumidor no contexto de Expedição.
-- [ ] Mover controllers web para os pacotes de apresentação de seus respectivos contextos.
+- [x] Implementar Value Object imutável `Validade` com validações no construtor.
+- [x] Escrever testes unitários TDD verificando rejeição de alocação excessiva e validade expirada (Ciclo Vermelho).
+- [x] Refatorar agregado `Requisicao` e entidade `Bolsa` para proteger as invariantes (Ciclo Verde).
+- [x] Implementar desacoplamento entre contextos através de interfaces públicas (`EstoqueService`).
+- [x] Publicar evento de domínio `RequisicaoAtendida` e consumidor nos contextos de Expedição/Notificação.
+- [x] Mover controllers web para os pacotes de apresentação de seus respectivos contextos e validar com ArchUnit.
 

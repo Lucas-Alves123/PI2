@@ -54,3 +54,4 @@ class ValidadeTest {
         assertThat(new Validade(HOJE).hashCode()).isEqualTo(new Validade(HOJE).hashCode());
     }
 }
+

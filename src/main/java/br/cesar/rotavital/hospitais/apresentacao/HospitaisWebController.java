@@ -1,7 +1,6 @@
-package br.cesar.rotavital.apresentacao;
+package br.cesar.rotavital.hospitais.apresentacao;
 
-import br.cesar.rotavital.hospitais.dados.HospitalRepositoryJpa;
-import br.cesar.rotavital.hospitais.negocio.dominio.Hospital;
+import br.cesar.rotavital.hospitais.negocio.aplicacao.HospitalService;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -13,15 +12,15 @@ import org.springframework.web.bind.annotation.RequestParam;
 @RequestMapping("/hospitais")
 public class HospitaisWebController {
 
-    private final HospitalRepositoryJpa hospitalRepository;
+    private final HospitalService hospitalService;
 
-    public HospitaisWebController(HospitalRepositoryJpa hospitalRepository) {
-        this.hospitalRepository = hospitalRepository;
+    public HospitaisWebController(HospitalService hospitalService) {
+        this.hospitalService = hospitalService;
     }
 
     @GetMapping
     public String listar(Model model) {
-        model.addAttribute("hospitais", hospitalRepository.findAll());
+        model.addAttribute("hospitais", hospitalService.listarTodos());
         return "hospitais";
     }
 
@@ -34,8 +33,7 @@ public class HospitaisWebController {
                             @RequestParam String telefone,
                             @RequestParam String email,
                             @RequestParam String responsavel) {
-        Hospital h = new Hospital(nome, cnpj, logradouro, cidade, estado, telefone, email, responsavel);
-        hospitalRepository.save(h);
+        hospitalService.cadastrar(nome, cnpj, logradouro, cidade, estado, telefone, email, responsavel);
         return "redirect:/hospitais";
     }
 }

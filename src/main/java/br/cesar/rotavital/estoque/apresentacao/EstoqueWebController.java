@@ -1,8 +1,6 @@
-package br.cesar.rotavital.apresentacao;
+package br.cesar.rotavital.estoque.apresentacao;
 
-import br.cesar.rotavital.estoque.dados.BolsaRepositoryJpa;
-import br.cesar.rotavital.estoque.negocio.dominio.Bolsa;
-import br.cesar.rotavital.estoque.negocio.dominio.StatusBolsa;
+import br.cesar.rotavital.estoque.negocio.aplicacao.EstoqueService;
 import br.cesar.rotavital.shared.Componente;
 import br.cesar.rotavital.shared.TipoAbo;
 import br.cesar.rotavital.shared.TipoRh;
@@ -19,15 +17,15 @@ import java.time.LocalDate;
 @RequestMapping("/estoque")
 public class EstoqueWebController {
 
-    private final BolsaRepositoryJpa bolsaRepository;
+    private final EstoqueService estoqueService;
 
-    public EstoqueWebController(BolsaRepositoryJpa bolsaRepository) {
-        this.bolsaRepository = bolsaRepository;
+    public EstoqueWebController(EstoqueService estoqueService) {
+        this.estoqueService = estoqueService;
     }
 
     @GetMapping
     public String listar(Model model) {
-        model.addAttribute("bolsas", bolsaRepository.findAll());
+        model.addAttribute("bolsas", estoqueService.listarBolsas());
         model.addAttribute("tiposAbo", TipoAbo.values());
         model.addAttribute("tiposRh", TipoRh.values());
         model.addAttribute("componentes", Componente.values());
@@ -42,25 +40,14 @@ public class EstoqueWebController {
                             @RequestParam String dataColeta,
                             @RequestParam String dataValidade,
                             @RequestParam String localizacao) {
-        Bolsa nova = new Bolsa(
-                codigo,
-                abo,
-                rh,
-                componente,
-                LocalDate.parse(dataColeta),
-                LocalDate.parse(dataValidade),
-                localizacao
-        );
-        bolsaRepository.save(nova);
+        estoqueService.registrarBolsa(codigo, abo, rh, componente,
+                LocalDate.parse(dataColeta), LocalDate.parse(dataValidade), localizacao);
         return "redirect:/estoque";
     }
 
     @PostMapping("/descartar")
     public String descartar(@RequestParam Long bolsaId) {
-        bolsaRepository.findById(bolsaId).ifPresent(b -> {
-            b.descartar("Descarte operacional");
-            bolsaRepository.save(b);
-        });
+        estoqueService.descartarBolsa(bolsaId, "Descarte operacional");
         return "redirect:/estoque";
     }
 }

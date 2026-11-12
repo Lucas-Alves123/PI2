@@ -1,13 +1,13 @@
 package br.cesar.rotavital.requisicao.negocio.aplicacao;
 
-import br.cesar.rotavital.estoque.dados.BolsaRepositoryJpa;
-import br.cesar.rotavital.estoque.negocio.dominio.Bolsa;
-import br.cesar.rotavital.estoque.negocio.dominio.StatusBolsa;
+import br.cesar.rotavital.estoque.negocio.aplicacao.BolsaCandidata;
+import br.cesar.rotavital.estoque.negocio.aplicacao.EstoqueService;
 import br.cesar.rotavital.requisicao.dados.RequisicaoRepositoryJpa;
 import br.cesar.rotavital.requisicao.negocio.dominio.Requisicao;
-import br.cesar.rotavital.requisicao.negocio.dominio.StatusRequisicao;
+import br.cesar.rotavital.requisicao.negocio.dominio.eventos.RequisicaoAtendida;
 import br.cesar.rotavital.shared.RegraDeNegocioException;
 import br.cesar.rotavital.shared.TipoSanguineo;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,60 +18,48 @@ import java.util.List;
 @Service
 public class AlocacaoFefoService {
 
-    private final BolsaRepositoryJpa bolsaRepository;
+    private final EstoqueService estoque;
     private final RequisicaoRepositoryJpa requisicaoRepository;
+    private final ApplicationEventPublisher eventos;
 
-    public AlocacaoFefoService(BolsaRepositoryJpa bolsaRepository, RequisicaoRepositoryJpa requisicaoRepository) {
-        this.bolsaRepository = bolsaRepository;
+    public AlocacaoFefoService(EstoqueService estoque,
+                               RequisicaoRepositoryJpa requisicaoRepository,
+                               ApplicationEventPublisher eventos) {
+        this.estoque = estoque;
         this.requisicaoRepository = requisicaoRepository;
+        this.eventos = eventos;
     }
 
-    /**
-     * Executa a alocação FEFO inteligente:
-     * 1. Busca bolsas candidatas do componente ordenadas por validade (FEFO)
-     * 2. Filtra por compatibilidade ABO/Rh
-     * 3. Reserva as bolsas até atingir a quantidade necessária
-     * 4. Registra na requisição
-     */
     @Transactional
-    public List<Bolsa> alocarParaRequisicao(Long requisicaoId) {
+    public List<Long> alocarParaRequisicao(Long requisicaoId) {
         Requisicao req = requisicaoRepository.findById(requisicaoId)
                 .orElseThrow(() -> new RegraDeNegocioException("Requisição não encontrada: " + requisicaoId));
 
-        if (req.getStatus() == StatusRequisicao.ATENDIDA ||
-            req.getStatus() == StatusRequisicao.CONCLUIDA ||
-            req.getStatus() == StatusRequisicao.CANCELADA) {
-            throw new RegraDeNegocioException("Requisição em status que não permite novas alocações: " + req.getStatus());
-        }
-
         int necessarias = req.quantidadePendente();
-        if (necessarias <= 0) {
+        if (necessarias == 0) {
             return List.of();
         }
 
         LocalDate hoje = LocalDate.now();
-        List<Bolsa> candidatas = bolsaRepository.buscarCandidatasFEFO(StatusBolsa.DISPONIVEL, req.getComponente(), hoje);
+        TipoSanguineo receptor = req.getTipoSanguineoSolicitado();
+        List<Long> reservadas = new ArrayList<>();
 
-        TipoSanguineo tipoReceptor = req.getTipoSanguineoSolicitado();
-        List<Bolsa> selecionadas = new ArrayList<>();
-
-        for (Bolsa bolsa : candidatas) {
-            if (selecionadas.size() >= necessarias) {
+        for (BolsaCandidata candidata : estoque.buscarCandidatasFefo(req.getComponente(), hoje)) {
+            if (reservadas.size() >= necessarias) {
                 break;
             }
-
-            TipoSanguineo tipoDoador = bolsa.getTipoSanguineo();
-            if (tipoDoador.podeDoarPara(tipoReceptor, req.getComponente())) {
-                bolsa.reservar();
-                bolsaRepository.save(bolsa);
-
-                req.adicionarAlocacao(bolsa.getId(), bolsa.getDataValidade());
-                selecionadas.add(bolsa);
+            if (candidata.tipoSanguineo().podeDoarPara(receptor, req.getComponente())) {
+                req.adicionarAlocacao(candidata.id(), candidata.validade(), hoje);
+                estoque.reservarBolsa(candidata.id());
+                reservadas.add(candidata.id());
             }
         }
 
         requisicaoRepository.save(req);
-        return selecionadas;
+
+        if (req.estaAtendida() && !reservadas.isEmpty()) {
+            eventos.publishEvent(new RequisicaoAtendida(req.getId(), req.getHospitalId(), req.bolsasAlocadas()));
+        }
+        return reservadas;
     }
 }
-
