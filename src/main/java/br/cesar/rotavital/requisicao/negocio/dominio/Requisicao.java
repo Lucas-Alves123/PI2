@@ -5,11 +5,13 @@ import br.cesar.rotavital.shared.RegraDeNegocioException;
 import br.cesar.rotavital.shared.TipoAbo;
 import br.cesar.rotavital.shared.TipoRh;
 import br.cesar.rotavital.shared.TipoSanguineo;
+import br.cesar.rotavital.shared.Validade;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Entity
@@ -82,23 +84,52 @@ public class Requisicao {
     }
 
     public void adicionarAlocacao(Long bolsaId, LocalDate validade) {
-        if (this.status == StatusRequisicao.CANCELADA || this.status == StatusRequisicao.CONCLUIDA) {
-            throw new RegraDeNegocioException("Não é permitido alocar bolsas em requisição concluída ou cancelada.");
+        adicionarAlocacao(bolsaId, new Validade(validade), LocalDate.now());
+    }
+
+    public void adicionarAlocacao(Long bolsaId, Validade validade, LocalDate hoje) {
+        if (this.status == StatusRequisicao.CANCELADA || this.status == StatusRequisicao.CONCLUIDA
+                || this.status == StatusRequisicao.EM_EXPEDICAO) {
+            throw new RegraDeNegocioException("Não é permitido alocar bolsas nesta requisição. Status: " + this.status);
+        }
+        if (totalAlocado() >= this.quantidade) {
+            throw new RegraDeNegocioException("A quantidade solicitada já foi atendida.");
+        }
+        if (validade.estaVencidaEm(hoje)) {
+            throw new RegraDeNegocioException("Bolsa vencida não pode ser alocada.");
         }
         boolean jaExiste = alocacoes.stream().anyMatch(a -> a.getBolsaId().equals(bolsaId));
         if (jaExiste) {
             throw new RegraDeNegocioException("Bolsa já vinculada a esta requisição.");
         }
 
-        Alocacao aloc = new Alocacao(this, bolsaId, validade);
-        this.alocacoes.add(aloc);
+        this.alocacoes.add(new Alocacao(this, bolsaId, validade.data()));
         atualizarStatusAtendimento();
     }
 
-    public void atualizarStatusAtendimento() {
-        int totalAlocado = (int) alocacoes.stream()
+    public int quantidadePendente() {
+        return Math.max(0, this.quantidade - totalAlocado());
+    }
+
+    public boolean estaAtendida() {
+        return this.status == StatusRequisicao.ATENDIDA;
+    }
+
+    public List<Long> bolsasAlocadas() {
+        return alocacoes.stream()
+                .filter(a -> a.getStatus() != StatusAlocacao.CANCELADA)
+                .map(Alocacao::getBolsaId)
+                .toList();
+    }
+
+    private int totalAlocado() {
+        return (int) alocacoes.stream()
                 .filter(a -> a.getStatus() == StatusAlocacao.RESERVADA || a.getStatus() == StatusAlocacao.CONFIRMADA)
                 .count();
+    }
+
+    private void atualizarStatusAtendimento() {
+        int totalAlocado = totalAlocado();
 
         if (totalAlocado == 0) {
             this.status = StatusRequisicao.PENDENTE;
@@ -131,7 +162,13 @@ public class Requisicao {
     }
 
     public void marcarConcluida() {
+        if (this.status != StatusRequisicao.EM_EXPEDICAO) {
+            throw new RegraDeNegocioException("Apenas requisições em expedição podem ser concluídas.");
+        }
         this.status = StatusRequisicao.CONCLUIDA;
+        for (Alocacao a : this.alocacoes) {
+            if (a.getStatus() == StatusAlocacao.RESERVADA) a.confirmar();
+        }
         this.atualizadoEm = OffsetDateTime.now();
     }
 
@@ -152,6 +189,6 @@ public class Requisicao {
     public String getObservacao() { return observacao; }
     public OffsetDateTime getCriadoEm() { return criadoEm; }
     public OffsetDateTime getAtualizadoEm() { return atualizadoEm; }
-    public List<Alocacao> getAlocacoes() { return alocacoes; }
+    public List<Alocacao> getAlocacoes() { return Collections.unmodifiableList(alocacoes); }
 }
 

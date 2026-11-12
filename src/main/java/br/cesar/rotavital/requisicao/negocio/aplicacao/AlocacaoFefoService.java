@@ -44,7 +44,7 @@ public class AlocacaoFefoService {
             throw new RegraDeNegocioException("Requisição em status que não permite novas alocações: " + req.getStatus());
         }
 
-        int necessarias = req.getQuantidade() - req.getAlocacoes().size();
+        int necessarias = req.quantidadePendente();
         if (necessarias <= 0) {
             return List.of();
         }

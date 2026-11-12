@@ -5,6 +5,7 @@ import br.cesar.rotavital.shared.RegraDeNegocioException;
 import br.cesar.rotavital.shared.TipoAbo;
 import br.cesar.rotavital.shared.TipoRh;
 import br.cesar.rotavital.shared.TipoSanguineo;
+import br.cesar.rotavital.shared.Validade;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -56,21 +57,23 @@ public class Bolsa {
         if (codigo == null || codigo.isBlank()) {
             throw new RegraDeNegocioException("Código da bolsa é obrigatório.");
         }
-        if (dataValidade == null || dataColeta == null || !dataValidade.isAfter(dataColeta)) {
-            throw new RegraDeNegocioException("Data de validade deve ser posterior à data de coleta.");
-        }
+        Validade validade = Validade.posteriorA(dataColeta, dataValidade);
         this.codigo = codigo.trim().toUpperCase();
         this.abo = abo;
         this.rh = rh;
         this.componente = componente;
         this.dataColeta = dataColeta;
-        this.dataValidade = dataValidade;
+        this.dataValidade = validade.data();
         this.localizacao = localizacao;
         this.status = StatusBolsa.DISPONIVEL;
     }
 
+    public Validade getValidade() {
+        return new Validade(dataValidade);
+    }
+
     public boolean estaVencida(LocalDate referencia) {
-        return referencia.isAfter(this.dataValidade);
+        return getValidade().estaVencidaEm(referencia);
     }
 
     public boolean estaDisponivel() {
@@ -113,7 +116,5 @@ public class Bolsa {
     public String getLocalizacao() { return localizacao; }
     public StatusBolsa getStatus() { return status; }
     public OffsetDateTime getCadastradoEm() { return cadastradoEm; }
-
-    public void setStatus(StatusBolsa status) { this.status = status; }
 }
 
