@@ -1,0 +1,25 @@
+databases:
+  - name: rotavital-db
+    databaseName: rotavital
+    user: rotavital
+    plan: free
+
+services:
+  - type: web
+    name: rotavital
+    runtime: docker
+    plan: free
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: DB_URL
+        value: jdbc:postgresql://dpg-rotavital:5432/rotavital
+      - key: DB_USER
+        fromDatabase:
+          name: rotavital-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: rotavital-db
+          property: password
+      - key: ADMIN_PASSWORD
+        value: admin123

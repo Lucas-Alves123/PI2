@@ -129,7 +129,11 @@ docker compose up -d --build
 
 ## Deploy e esteira CI/CD
 
-O workflow em [`.github/workflows/pipeline.yml`](.github/workflows/pipeline.yml) roda a cada push/PR executando `./mvnw verify -B`. Quando o push é na `main`, publica a imagem no GitHub Container Registry (`ghcr.io/lucas-alves123/rotavital:latest`), dispara o deploy e valida a aplicação com um teste de fumaça em `/actuator/health`.
+O workflow em [`.github/workflows/pipeline.yml`](.github/workflows/pipeline.yml) roda a cada push/PR executando `./mvnw verify -B`. Quando o push é na `main`, publica a imagem no GitHub Container Registry (`ghcr.io/lucas-alves123/rotavital:latest`), dispara o deploy no Render e valida a aplicação com um teste de fumaça em `/actuator/health`.
+
+URL da aplicação publicada:
+
+> **<https://rotavital.onrender.com>**
 
 ## Uso de IA (PO-CESAR-021 - Categoria Condicionado)
 
