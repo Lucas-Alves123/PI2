@@ -4,6 +4,7 @@ import br.cesar.rotavital.requisicao.negocio.dominio.Requisicao;
 import br.cesar.rotavital.requisicao.negocio.dominio.StatusRequisicao;
 import br.cesar.rotavital.requisicao.negocio.dominio.Urgencia;
 import br.cesar.rotavital.shared.Componente;
+import br.cesar.rotavital.shared.RegraDeNegocioException;
 import br.cesar.rotavital.shared.TipoAbo;
 import br.cesar.rotavital.shared.TipoRh;
 import org.junit.jupiter.api.Test;
@@ -67,6 +68,49 @@ class RequisicaoTest {
         assertThatThrownBy(() ->
             new Requisicao(null, null, TipoAbo.O, TipoRh.NEGATIVO, Componente.PFC, 1, Urgencia.ROTINA, null)
         ).hasMessageContaining("Hospital é obrigatório");
+    }
+
+    @Test
+    void naoDeveAlocarAlemDaQuantidadeSolicitada() {
+        Requisicao req = requisicaoPadrao();
+        req.adicionarAlocacao(100L, LocalDate.now().plusDays(10));
+        req.adicionarAlocacao(200L, LocalDate.now().plusDays(20));
+        assertThatThrownBy(() -> req.adicionarAlocacao(300L, LocalDate.now().plusDays(30)))
+                .isInstanceOf(RegraDeNegocioException.class)
+                .hasMessageContaining("quantidade");
+        assertThat(req.getAlocacoes()).hasSize(2);
+    }
+
+    @Test
+    void naoDeveAlocarBolsaVencida() {
+        Requisicao req = requisicaoPadrao();
+        assertThatThrownBy(() -> req.adicionarAlocacao(100L, LocalDate.now().minusDays(1)))
+                .isInstanceOf(RegraDeNegocioException.class)
+                .hasMessageContaining("vencida");
+        assertThat(req.getStatus()).isEqualTo(StatusRequisicao.PENDENTE);
+    }
+
+    @Test
+    void alocacoesSoMudamPelaRaiz() {
+        Requisicao req = requisicaoPadrao();
+        req.adicionarAlocacao(100L, LocalDate.now().plusDays(10));
+        assertThatThrownBy(() -> req.getAlocacoes().clear())
+                .isInstanceOf(UnsupportedOperationException.class);
+    }
+
+    @Test
+    void naoDeveIrParaExpedicaoSemEstarAtendida() {
+        Requisicao req = requisicaoPadrao();
+        req.adicionarAlocacao(100L, LocalDate.now().plusDays(10));
+        assertThatThrownBy(req::marcarEmExpedicao)
+                .isInstanceOf(RegraDeNegocioException.class);
+    }
+
+    @Test
+    void naoDeveConcluirSemPassarPelaExpedicao() {
+        Requisicao req = requisicaoPadrao();
+        assertThatThrownBy(req::marcarConcluida)
+                .isInstanceOf(RegraDeNegocioException.class);
     }
 }
 

@@ -44,3 +44,4 @@ Permitir que o atendente hospitalar registre uma requisição de hemocomponentes
 - [ ] Implementar desacoplamento entre contextos através de interfaces públicas (`EstoquePublicService`).
 - [ ] Publicar evento de domínio `RequisicaoAtendidaEvent` e consumidor no contexto de Expedição.
 - [ ] Mover controllers web para os pacotes de apresentação de seus respectivos contextos.
+
