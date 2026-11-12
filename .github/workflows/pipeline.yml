@@ -2,13 +2,13 @@ name: CI/CD — Rota Vital
 
 on:
   push:
-    branches: [main]
+    branches: [main, 'feat/**']
   pull_request:
     branches: [main]
 
 jobs:
   testes:
-    name: Testes (unitários + integração + BDD)
+    name: Testes (unitários + ArchUnit + BDD Cucumber)
     runs-on: ubuntu-latest
 
     steps:
@@ -21,15 +21,17 @@ jobs:
           distribution: 'temurin'
           cache: maven
 
-      - name: Executar todos os testes
+      - name: Executar testes unitários, arquitetura e BDD (Cucumber)
         run: ./mvnw verify -B
-        # mvn verify: unitários (surefire) + integração/BDD (failsafe + Testcontainers)
 
   imagem:
     name: Publicar imagem Docker
     needs: testes
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
 
     steps:
       - uses: actions/checkout@v4
@@ -49,18 +51,49 @@ jobs:
           tags: ghcr.io/${{ github.repository_owner }}/rotavital:latest
 
   deploy:
-    name: Deploy no Render
+    name: Deploy e Smoke Test
     needs: imagem
     if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     runs-on: ubuntu-latest
 
     steps:
-      - name: Disparar deploy hook do Render
-        run: |
-          curl -sSf "${{ secrets.RENDER_DEPLOY_HOOK_URL }}" > /dev/null
+      - uses: actions/checkout@v4
 
-      - name: Smoke test (health check)
+      - name: Disparar deploy hook do Render (quando configurado)
+        env:
+          HOOK_URL: ${{ secrets.RENDER_DEPLOY_HOOK_URL }}
         run: |
-          sleep 30
-          curl -sSf "${{ secrets.RENDER_APP_URL }}/actuator/health" | grep '"status":"UP"'
+          if [ -n "$HOOK_URL" ]; then
+            curl -sSf "$HOOK_URL" > /dev/null
+            echo "Deploy disparado no Render com sucesso."
+          else
+            echo "RENDER_DEPLOY_HOOK_URL nao configurado; executando validacao de container na esteira."
+          fi
 
+      - name: Smoke test da versao publicada (/actuator/health)
+        env:
+          APP_URL: ${{ secrets.RENDER_APP_URL }}
+        run: |
+          if [ -n "$APP_URL" ]; then
+            for i in $(seq 1 12); do
+              if curl -sSf "$APP_URL/actuator/health" | grep -q '"status":"UP"'; then
+                echo "Smoke test em producao ($APP_URL) passou!"
+                exit 0
+              fi
+              sleep 10
+            done
+            exit 1
+          else
+            docker compose up -d --build
+            for i in $(seq 1 18); do
+              if curl -sSf "http://localhost:8080/actuator/health" | grep -q '"status":"UP"'; then
+                echo "Smoke test do container (/actuator/health -> UP) passou!"
+                docker compose down -v
+                exit 0
+              fi
+              sleep 5
+            done
+            docker compose logs
+            docker compose down -v
+            exit 1
+          fi
