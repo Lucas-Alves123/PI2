@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pt-BR" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rota Vital | Acesso ao Sistema</title>
+  <link rel="stylesheet" th:href="@{/css/estilo.css}">
+</head>
+<body class="login-body">
+  <div class="login-wrapper">
+    <div class="login-brand-panel">
+      <div class="login-logo">
+        <span class="login-drop">&#129656;</span>
+        <span>Rota Vital</span>
+      </div>
+      <h1>Logística Inteligente de Hemocomponentes</h1>
+      <p>Gestão integrada de estoque, alocação FEFO por compatibilidade ABO/Rh, expedição hospitalar e monitoramento de cadeia fria.</p>
+      <div class="login-highlights">
+        <div class="highlight-item">Alocação automática FEFO</div>
+        <div class="highlight-item">Controle térmico 2 °C a 6 °C</div>
+        <div class="highlight-item">Rastreabilidade ponta a ponta</div>
+      </div>
+    </div>
+
+    <div class="login-form-panel">
+      <h2>Entrar na plataforma</h2>
+      <p class="login-subtitle">Informe suas credenciais operacionais para continuar.</p>
+
+      <div th:if="${param.error}" class="alert-error">
+        Usuário ou senha inválidos. Tente novamente.
+      </div>
+      <div th:if="${param.logout}" class="alert-success">
+        Sessão encerrada com sucesso.
+      </div>
+
+      <form th:action="@{/login}" method="post" class="login-form">
+        <div class="form-group">
+          <label for="username">Usuário</label>
+          <input id="username" type="text" name="username" placeholder="ex: admin" required autofocus>
+        </div>
+        <div class="form-group">
+          <label for="password">Senha</label>
+          <input id="password" type="password" name="password" placeholder="Digite sua senha" required>
+        </div>
+        <button type="submit" class="btn-primary btn-login">Acessar Sistema</button>
+      </form>
+
+      <div class="login-footer">
+        Ambiente acadêmico com dados sintéticos · CESAR School
+      </div>
+    </div>
+  </div>
+</body>
+</html>
