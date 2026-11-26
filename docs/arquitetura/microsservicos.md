@@ -132,7 +132,7 @@ A Saga é um padrão de consistência eventual para transações distribuídas. 
 5. Requisição+Estoque    → Recebe ExpedicaoCancelada
                          → Cancela reservas das bolsas
                          → Muda status das bolsas para Disponível
-                         → Muda status da requisição para Atendida (aguardando expedição)
+                         → Muda status da requisição para Pendente (sem bolsas alocadas, aguardando nova alocação)
                          → Registra ocorrência
 6. Notificação           → Recebe ExpedicaoCancelada
                          → Alerta o operador de expedição

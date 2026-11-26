@@ -35,7 +35,7 @@ Onde:
 Se o pico é de 10 req/s e cada requisição demora 0,2 s:  
 L = 10 × 0,2 = **2 requisições em andamento ao mesmo tempo**
 
-Isso significa que precisamos de capacidade para processar pelo menos 2 requisições concorrentes. Se cada instância da aplicação suporta ~50 threads, **1 instância é suficiente** para este caso.
+Isso significa que precisamos de capacidade para processar pelo menos 2 requisições concorrentes. Adotando a margem operacional de **~4 requisições simultâneas por instância** (preservando folga de CPU, banco e picos de 2× a 3×), **1 instância é suficiente** para este caso.
 
 ---
 
@@ -163,13 +163,14 @@ L (total)      ≈ 18 requisições concorrentes
 ```
 
 **Instâncias necessárias:**  
-- Aplicação: 4 instâncias (para atender à disponibilidade de 99,9% com redundância N+2 e margem de folga para picos de 2× a 3× sobre L = 16, mantendo cada instância bem abaixo do limite de saturação de CPU/threads).  
-- Telemetria: 2 instâncias separadas (justificativa para extração como microsserviço).  
-**Conexões com banco (derivadas de L):**  
-- Fórmula adotada: `pool por instância = max(5, ceil((L / instâncias) × fator de segurança 3))`.  
-- Cenário 1: `max(5, ceil(0,4 × 3)) = 5` conexões (1 instância = 5 conexões totais).  
-- Cenário 2: `max(10, ceil((3,4 / 2) × 3)) = 10` conexões por instância (2 instâncias = 20 conexões totais).  
-- Cenário 3: `max(15, ceil((16 / 4) × 3)) = 15` conexões por instância Core (`4 × 15 = 60`) + `15 × 2 = 30` nas instâncias de telemetria = **90 conexões totais**.
+- Aplicação: 4 instâncias (`L = 16 ÷ 4 req/instância = 4` instâncias, atendendo também à disponibilidade de 99,9% com redundância N+2).  
+- Telemetria: 2 instâncias separadas (justificativa para extração como microsserviço e redundância ativa-ativa).  
+**Conexões com banco (derivadas de L pela fórmula única `max(5, ceil((L / instâncias) × 3))`):**  
+- Cenário 1: `max(5, ceil((0,4 / 1) × 3)) = 5` conexões (1 instância = **5 conexões totais**).  
+- Cenário 2: `max(5, ceil((3,4 / 2) × 3)) = 6` conexões mínimas por instância (adotado pool padrão de 10 por instância = **20 conexões totais**).  
+- Cenário 3 (Core): `max(5, ceil((16 / 4) × 3)) = 12` conexões mínimas por instância (configurado 15 por instância com margem = 60 conexões).  
+- Cenário 3 (Telemetria): `max(5, ceil((1,5 / 2) × 3)) = 5` conexões por instância (`2 × 5 = 10` conexões).  
+- **Total Cenário 3:** `60 + 10 =` **70 conexões totais**.
 
 ### Diagrama — Cenário 3
 
@@ -217,7 +218,7 @@ L (total)      ≈ 18 requisições concorrentes
 | L (concorrência) | 0,4 | 3,4 | 18 |
 | Instâncias app | 1 | 2 | 4 |
 | Instâncias telemetria | — | — | 2 |
-| Conexões banco | 5 | 20 | 90 |
+| Conexões banco | 5 | 20 | 70 |
 | Disponibilidade | 99,5% | 99,5% | 99,9% |
 
 ---
@@ -231,7 +232,7 @@ Os cálculos acima assumem W = 0,2 s (200 ms). Na prática, o tempo de processam
 | 100 ms | L = 0,2 | L = 1,5 | L = 8,0 | 2 |
 | **200 ms (baseline)** | **L = 0,4** | **L = 3,0** | **L = 16,0** | **4** |
 | 400 ms | L = 0,8 | L = 6,0 | L = 32,0 | 8 |
-| 800 ms | L = 1,6 | L = 12,0 | L = 64,0 | 14 |
+| 800 ms | L = 1,6 | L = 12,0 | L = 64,0 | 16 |
 
 > *Nota:* A tabela acima considera apenas a carga da aplicação principal (λ = 2, 15 e 80 req/s). Somando a telemetria no baseline (200 ms), o L total é 0,42 (C1), 3,4 (C2) e 17,5 ≈ 18 (C3), conforme a tabela-resumo anterior.
 

@@ -173,11 +173,11 @@ Colocar essa lógica direto na `Requisicao` foi descartado: a raiz do agregado n
 
 | # | Invariante | Onde é verificada |
 |---|-----------|------------------|
-| 1 | Só bolsas compatíveis com o tipo sanguíneo solicitado podem ser alocadas | `Requisicao.alocar()` |
-| 2 | Entre as bolsas compatíveis, priorizar a que vence primeiro (FEFO) | `ServicoAlocacao.selecionarBolsas()` |
-| 3 | Uma bolsa não pode estar reservada em duas requisições ativas simultaneamente | `BolsaRepository` + constraint de banco |
-| 4 | Uma requisição só pode ter status ATENDIDA quando todas as alocações estão confirmadas | `Requisicao.concluir()` |
-| 5 | Bolsas vencidas não podem ser alocadas | `Estoque` (verificado antes de retornar bolsas disponíveis) |
+| 1 | Só bolsas compatíveis com o tipo sanguíneo solicitado podem ser alocadas | `TipoSanguineo.podeDoarPara()` em `AlocacaoFefoService.alocarParaRequisicao()` |
+| 2 | Entre as bolsas compatíveis, priorizar a que vence primeiro (FEFO) | `BolsaRepositoryJpa.buscarCandidatasFEFO()` + `Validade.venceAntesDe()` |
+| 3 | Uma bolsa não pode estar reservada em duas requisições ativas simultaneamente | `Bolsa.reservar()` + `Requisicao.adicionarAlocacao()` + índice único parcial `idx_bolsa_unica_ativa` |
+| 4 | Uma requisição só atinge status ATENDIDA quando supre toda a quantidade solicitada e não aceita excesso | `Requisicao.adicionarAlocacao()`, `Requisicao.estaAtendida()` e `Requisicao.marcarEmExpedicao()` |
+| 5 | Bolsas vencidas não podem ser alocadas | `Validade.estaVencidaEm()` em `Requisicao.adicionarAlocacao()` e filtro `dataValidade >= hoje` no Estoque |
 
 ---
 
