@@ -68,11 +68,12 @@ CREATE TABLE alocacao (
     bolsa_id        BIGINT      NOT NULL REFERENCES bolsa(id),
     data_validade   DATE        NOT NULL,
     status          VARCHAR(20) NOT NULL DEFAULT 'RESERVADA' CHECK (status IN ('RESERVADA', 'CONFIRMADA', 'CANCELADA')),
-    alocado_em      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
-
-    CONSTRAINT bolsa_unica_ativa UNIQUE (bolsa_id)
-        DEFERRABLE INITIALLY DEFERRED
+    alocado_em      TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+CREATE UNIQUE INDEX idx_bolsa_unica_ativa
+    ON alocacao (bolsa_id)
+    WHERE status IN ('RESERVADA', 'CONFIRMADA');
 
 CREATE TABLE veiculo (
     id       BIGSERIAL PRIMARY KEY,

@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: ${DB_URL:jdbc:postgresql://localhost:5432/rotavital}
+    url: ${DB_URL:jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:rotavital}}
     username: ${DB_USER:rotavital}
     password: ${DB_PASSWORD:rotavital}
     hikari:

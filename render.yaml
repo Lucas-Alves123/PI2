@@ -11,8 +11,18 @@ services:
     plan: free
     healthCheckPath: /actuator/health
     envVars:
-      - key: DB_URL
-        value: jdbc:postgresql://dpg-rotavital:5432/rotavital
+      - key: DB_HOST
+        fromDatabase:
+          name: rotavital-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: rotavital-db
+          property: port
+      - key: DB_NAME
+        fromDatabase:
+          name: rotavital-db
+          property: database
       - key: DB_USER
         fromDatabase:
           name: rotavital-db
