@@ -4,7 +4,7 @@ CREATE TABLE hospital (
     cnpj        VARCHAR(18)  NOT NULL UNIQUE,
     logradouro  VARCHAR(200),
     cidade      VARCHAR(100),
-    estado      CHAR(2),
+    estado      VARCHAR(2),
     telefone    VARCHAR(20),
     email       VARCHAR(100),
     responsavel VARCHAR(150),
@@ -19,82 +19,59 @@ CREATE TABLE unidade (
     ativa       BOOLEAN      NOT NULL DEFAULT TRUE
 );
 
-CREATE TYPE perfil_usuario AS ENUM (
-    'ADMINISTRADOR', 'ESTOQUE', 'ATENDIMENTO', 'EXPEDICAO'
-);
-
 CREATE TABLE usuario (
     id           BIGSERIAL PRIMARY KEY,
-    login        VARCHAR(60)    NOT NULL UNIQUE,
-    senha_hash   VARCHAR(255)   NOT NULL,
-    nome         VARCHAR(150)   NOT NULL,
-    email        VARCHAR(100)   NOT NULL UNIQUE,
-    perfil       perfil_usuario NOT NULL,
-    ativo        BOOLEAN        NOT NULL DEFAULT TRUE,
-    criado_em    TIMESTAMPTZ    NOT NULL DEFAULT NOW()
-);
-
-CREATE TYPE tipo_abo AS ENUM ('A', 'B', 'AB', 'O');
-CREATE TYPE tipo_rh  AS ENUM ('POSITIVO', 'NEGATIVO');
-CREATE TYPE componente AS ENUM ('CH', 'PFC', 'CP', 'CRIO');
-CREATE TYPE status_bolsa AS ENUM (
-    'DISPONIVEL', 'RESERVADA', 'EM_SEPARACAO',
-    'EM_EXPEDICAO', 'ENTREGUE', 'DESCARTADA', 'VENCIDA'
+    login        VARCHAR(60)  NOT NULL UNIQUE,
+    senha_hash   VARCHAR(255) NOT NULL,
+    nome         VARCHAR(150) NOT NULL,
+    email        VARCHAR(100) NOT NULL UNIQUE,
+    perfil       VARCHAR(30)  NOT NULL CHECK (perfil IN ('ADMINISTRADOR', 'ESTOQUE', 'ATENDIMENTO', 'EXPEDICAO')),
+    ativo        BOOLEAN      NOT NULL DEFAULT TRUE,
+    criado_em    TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE bolsa (
     id              BIGSERIAL PRIMARY KEY,
-    codigo          VARCHAR(30)   NOT NULL UNIQUE,
-    abo             tipo_abo      NOT NULL,
-    rh              tipo_rh       NOT NULL,
-    componente      componente    NOT NULL,
-    data_coleta     DATE          NOT NULL,
-    data_validade   DATE          NOT NULL,
+    codigo          VARCHAR(30)  NOT NULL UNIQUE,
+    abo             VARCHAR(10)  NOT NULL CHECK (abo IN ('A', 'B', 'AB', 'O')),
+    rh              VARCHAR(15)  NOT NULL CHECK (rh IN ('POSITIVO', 'NEGATIVO')),
+    componente      VARCHAR(15)  NOT NULL CHECK (componente IN ('CH', 'PFC', 'CP', 'CRIO')),
+    data_coleta     DATE         NOT NULL,
+    data_validade   DATE         NOT NULL,
     localizacao     VARCHAR(100),
-    status          status_bolsa  NOT NULL DEFAULT 'DISPONIVEL',
-    cadastrado_em   TIMESTAMPTZ   NOT NULL DEFAULT NOW(),
+    status          VARCHAR(30)  NOT NULL DEFAULT 'DISPONIVEL' CHECK (status IN ('DISPONIVEL', 'RESERVADA', 'EM_SEPARACAO', 'EM_EXPEDICAO', 'ENTREGUE', 'DESCARTADA', 'VENCIDA')),
+    cadastrado_em   TIMESTAMPTZ  NOT NULL DEFAULT NOW(),
 
     CONSTRAINT validade_apos_coleta CHECK (data_validade > data_coleta)
 );
 
 CREATE INDEX idx_bolsa_status_tipo ON bolsa(status, abo, rh, componente, data_validade);
 
-CREATE TYPE urgencia AS ENUM ('ROTINA', 'URGENCIA', 'EMERGENCIA');
-CREATE TYPE status_requisicao AS ENUM (
-    'PENDENTE', 'EM_ANALISE', 'PARCIALMENTE_ATENDIDA',
-    'ATENDIDA', 'EM_EXPEDICAO', 'CONCLUIDA', 'CANCELADA'
-);
-CREATE TYPE status_alocacao AS ENUM ('RESERVADA', 'CONFIRMADA', 'CANCELADA');
-
 CREATE TABLE requisicao (
-    id                  BIGSERIAL          PRIMARY KEY,
-    hospital_id         BIGINT             NOT NULL REFERENCES hospital(id),
-    unidade_id          BIGINT             REFERENCES unidade(id),
-    abo_solicitado      tipo_abo           NOT NULL,
-    rh_solicitado       tipo_rh            NOT NULL,
-    componente          componente         NOT NULL,
-    quantidade          INTEGER            NOT NULL CHECK (quantidade > 0),
-    urgencia            urgencia           NOT NULL DEFAULT 'ROTINA',
-    status              status_requisicao  NOT NULL DEFAULT 'PENDENTE',
+    id                  BIGSERIAL   PRIMARY KEY,
+    hospital_id         BIGINT      NOT NULL REFERENCES hospital(id),
+    unidade_id          BIGINT      REFERENCES unidade(id),
+    abo_solicitado      VARCHAR(10) NOT NULL CHECK (abo_solicitado IN ('A', 'B', 'AB', 'O')),
+    rh_solicitado       VARCHAR(15) NOT NULL CHECK (rh_solicitado IN ('POSITIVO', 'NEGATIVO')),
+    componente          VARCHAR(15) NOT NULL CHECK (componente IN ('CH', 'PFC', 'CP', 'CRIO')),
+    quantidade          INTEGER     NOT NULL CHECK (quantidade > 0),
+    urgencia            VARCHAR(20) NOT NULL DEFAULT 'ROTINA' CHECK (urgencia IN ('ROTINA', 'URGENCIA', 'EMERGENCIA')),
+    status              VARCHAR(30) NOT NULL DEFAULT 'PENDENTE' CHECK (status IN ('PENDENTE', 'EM_ANALISE', 'PARCIALMENTE_ATENDIDA', 'ATENDIDA', 'EM_EXPEDICAO', 'CONCLUIDA', 'CANCELADA')),
     observacao          TEXT,
-    criado_em           TIMESTAMPTZ        NOT NULL DEFAULT NOW(),
-    atualizado_em       TIMESTAMPTZ        NOT NULL DEFAULT NOW()
+    criado_em           TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+    atualizado_em       TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE alocacao (
-    id              BIGSERIAL         PRIMARY KEY,
-    requisicao_id   BIGINT            NOT NULL REFERENCES requisicao(id),
-    bolsa_id        BIGINT            NOT NULL REFERENCES bolsa(id),
-    data_validade   DATE              NOT NULL,
-    status          status_alocacao   NOT NULL DEFAULT 'RESERVADA',
-    alocado_em      TIMESTAMPTZ       NOT NULL DEFAULT NOW(),
+    id              BIGSERIAL   PRIMARY KEY,
+    requisicao_id   BIGINT      NOT NULL REFERENCES requisicao(id),
+    bolsa_id        BIGINT      NOT NULL REFERENCES bolsa(id),
+    data_validade   DATE        NOT NULL,
+    status          VARCHAR(20) NOT NULL DEFAULT 'RESERVADA' CHECK (status IN ('RESERVADA', 'CONFIRMADA', 'CANCELADA')),
+    alocado_em      TIMESTAMPTZ NOT NULL DEFAULT NOW(),
 
     CONSTRAINT bolsa_unica_ativa UNIQUE (bolsa_id)
         DEFERRABLE INITIALLY DEFERRED
-);
-
-CREATE TYPE status_expedicao AS ENUM (
-    'PREPARANDO', 'EM_TRANSITO', 'ENTREGUE', 'CANCELADA'
 );
 
 CREATE TABLE veiculo (
@@ -105,16 +82,16 @@ CREATE TABLE veiculo (
 );
 
 CREATE TABLE guia_expedicao (
-    id              BIGSERIAL          PRIMARY KEY,
-    numero          VARCHAR(30)        NOT NULL UNIQUE,
-    requisicao_id   BIGINT             NOT NULL REFERENCES requisicao(id),
-    hospital_id     BIGINT             NOT NULL REFERENCES hospital(id),
-    veiculo_id      BIGINT             REFERENCES veiculo(id),
+    id              BIGSERIAL    PRIMARY KEY,
+    numero          VARCHAR(30)  NOT NULL UNIQUE,
+    requisicao_id   BIGINT       NOT NULL REFERENCES requisicao(id),
+    hospital_id     BIGINT       NOT NULL REFERENCES hospital(id),
+    veiculo_id      BIGINT       REFERENCES veiculo(id),
     responsavel     VARCHAR(150),
-    status          status_expedicao   NOT NULL DEFAULT 'PREPARANDO',
+    status          VARCHAR(20)  NOT NULL DEFAULT 'PREPARANDO' CHECK (status IN ('PREPARANDO', 'EM_TRANSITO', 'ENTREGUE', 'CANCELADA')),
     saida_em        TIMESTAMPTZ,
     entrega_em      TIMESTAMPTZ,
-    criado_em       TIMESTAMPTZ        NOT NULL DEFAULT NOW()
+    criado_em       TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE guia_bolsa (
@@ -136,26 +113,20 @@ CREATE TABLE leitura_telemetria (
 
 CREATE INDEX idx_telemetria_guia ON leitura_telemetria(guia_id, lido_em DESC);
 
-CREATE TYPE tipo_notificacao AS ENUM (
-    'NOVA_REQUISICAO', 'REQUISICAO_ATENDIDA', 'BOLSA_VENCENDO',
-    'BOLSA_VENCIDA', 'EXPEDICAO_INICIADA', 'ENTREGA_CONCLUIDA',
-    'ALERTA_TEMPERATURA'
-);
-
 CREATE TABLE notificacao (
-    id          BIGSERIAL          PRIMARY KEY,
-    tipo        tipo_notificacao   NOT NULL,
-    titulo      VARCHAR(200)       NOT NULL,
-    mensagem    TEXT               NOT NULL,
-    lida        BOOLEAN            NOT NULL DEFAULT FALSE,
-    criada_em   TIMESTAMPTZ        NOT NULL DEFAULT NOW()
+    id          BIGSERIAL    PRIMARY KEY,
+    tipo        VARCHAR(30)  NOT NULL CHECK (tipo IN ('NOVA_REQUISICAO', 'REQUISICAO_ATENDIDA', 'BOLSA_VENCENDO', 'BOLSA_VENCIDA', 'EXPEDICAO_INICIADA', 'ENTREGA_CONCLUIDA', 'ALERTA_TEMPERATURA')),
+    titulo      VARCHAR(200) NOT NULL,
+    mensagem    TEXT         NOT NULL,
+    lida        BOOLEAN      NOT NULL DEFAULT FALSE,
+    criada_em   TIMESTAMPTZ  NOT NULL DEFAULT NOW()
 );
 
 INSERT INTO hospital (nome, cnpj, logradouro, cidade, estado, telefone, email, responsavel) VALUES
-('Hospital das Clínicas Fictício',   '00.000.001/0001-01', 'Av. Dr. Enéas de Carvalho, 155', 'Recife',   'PE', '(81) 3000-0001', 'hcf@exemplo.com',   'Dra. Marina Fonseca'),
-('UPA Central Sintética',            '00.000.002/0001-02', 'Rua da Esperança, 220',           'Olinda',   'PE', '(81) 3000-0002', 'upa@exemplo.com',   'Dr. Carlos Melo'),
-('Hospital Metropolitano Teste',     '00.000.003/0001-03', 'Estrada do Arraial, 3000',        'Caruaru',  'PE', '(81) 3000-0003', 'hmt@exemplo.com',   'Dra. Renata Lima'),
-('Santa Casa de Misericórdia Fictícia','00.000.004/0001-04','Rua Santa Fé, 50',              'Campina Grande','PB','(83) 3000-0004','scm@exemplo.com', 'Dr. Paulo Souza');
+('Hospital das Clínicas Fictício',    '00.000.001/0001-01', 'Av. Dr. Enéas de Carvalho, 155', 'Recife',         'PE', '(81) 3000-0001', 'hcf@exemplo.com', 'Dra. Marina Fonseca'),
+('UPA Central Sintética',             '00.000.002/0001-02', 'Rua da Esperança, 220',          'Olinda',         'PE', '(81) 3000-0002', 'upa@exemplo.com', 'Dr. Carlos Melo'),
+('Hospital Metropolitano Teste',      '00.000.003/0001-03', 'Estrada do Arraial, 3000',       'Caruaru',        'PE', '(81) 3000-0003', 'hmt@exemplo.com', 'Dra. Renata Lima'),
+('Santa Casa de Misericórdia Fictícia','00.000.004/0001-04','Rua Santa Fé, 50',               'Campina Grande', 'PB', '(83) 3000-0004', 'scm@exemplo.com', 'Dr. Paulo Souza');
 
 INSERT INTO unidade (hospital_id, nome) VALUES
 (1, 'UTI Adulto'), (1, 'Pronto-Socorro'), (1, 'Bloco Cirúrgico'),
