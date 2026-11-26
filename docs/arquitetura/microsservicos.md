@@ -142,20 +142,37 @@ A Saga é um padrão de consistência eventual para transações distribuídas. 
 
 ---
 
-## Comparação: Monolito Modular vs. Microsserviços
+## Comparação: Monolito Modular, Microsserviços e Serverless
 
-| Aspecto | Monolito Modular (atual) | Microsserviços (projeção) |
-|---------|------------------------|--------------------------|
-| **Unidade de implantação** | Um único artefato (JAR + Docker image) | Múltiplos serviços, cada um com seu próprio container e pipeline |
-| **Escalabilidade** | Toda a aplicação escala junta | Cada serviço escala de forma independente (ex.: Telemetria pode ter 10 réplicas enquanto Hospitais tem 1) |
-| **Consistência** | Transações ACID garantidas pelo banco único | Consistência eventual via Sagas; mais complexo de implementar e testar |
-| **Custo de infraestrutura** | Baixo — 1 instância de app + 1 banco | Alto — múltiplas instâncias, múltiplos bancos, message broker, API Gateway |
-| **Complexidade operacional** | Baixa — `docker compose up` | Alta — Kubernetes ou ECS, service discovery, tracing distribuído, circuit breakers |
-| **Tempo de desenvolvimento** | Menor — sem overhead de comunicação entre serviços | Maior — cada serviço precisa de CI/CD próprio, contratos de API, gestão de versões |
-| **Isolamento de falhas** | Um bug pode afetar todos os módulos | Um serviço com falha não derruba os outros (com circuit breaker) |
-| **Recomendado quando** | Time pequeno, escopo definido, volume moderado | Time grande, escala por serviço necessária, domínio estável e bem definido |
+| Aspecto | Monolito Modular (atual) | Microsserviços (projeção) | Serverless (opcional) |
+|---------|------------------------|--------------------------|----------------------|
+| **Unidade de implantação** | Um único artefato (JAR + Docker image) | Múltiplos serviços, cada um com container e pipeline próprios | Funções individuais acionadas por evento (ex.: AWS Lambda) |
+| **Escalabilidade** | Toda a aplicação escala junta | Cada serviço escala de forma independente | Auto-scaling por função; ideal para carga esporádica |
+| **Consistência** | Transações ACID garantidas pelo banco único | Consistência eventual via Sagas | Stateless por natureza; sem suporte a transações longas |
+| **Custo de infraestrutura** | Baixo — 1 instância de app + 1 banco | Alto — múltiplos serviços, bancos, message broker, API Gateway | Próximo de zero para volumes baixos; cresce com o número de invocações |
+| **Complexidade operacional** | Baixa — `docker compose up` | Alta — Kubernetes ou ECS, service discovery, tracing distribuído | Baixa para funções simples; alta para fluxos com estado |
+| **Tempo de desenvolvimento** | Menor — sem overhead de comunicação entre serviços | Maior — CI/CD por serviço, contratos de API, gestão de versões | Rápido para funções simples; complexo para fluxos encadeados |
+| **Isolamento de falhas** | Um bug pode afetar todos os módulos | Um serviço com falha não derruba os outros (com circuit breaker) | Excelente — função falha de forma isolada; cold start pode causar latência |
+| **Recomendado quando** | Time pequeno, escopo definido, volume moderado | Time grande, escala por serviço necessária, domínio estável | Eventos pontuais e stateless (ex.: Notificação por e-mail/SMS) |
 
-**Conclusão:** Para o Rota Vital acadêmico e para uma operação de pequeno a médio porte, o monolito modular é a escolha correta. A projeção para microsserviços é o plano de evolução para quando o volume de telemetria justificar a separação.
+**Conclusão:** Para o Rota Vital acadêmico e para uma operação de pequeno a médio porte, o monolito modular é a escolha correta. A projeção para microsserviços é o plano de evolução para quando o volume de telemetria justificar a separação. Serverless é viável apenas para o contexto de Notificação, onde o padrão event-driven stateless se aplica naturalmente.
+
+---
+
+## Serverless — Avaliação e Descarte
+
+Para o Rota Vital, também avaliamos o uso de funções serverless (AWS Lambda) em vez de serviços sempre ativos.
+
+| Fator | Impacto no Rota Vital |
+|-------|----------------------|
+| **Cold start** | A alocação FEFO precisa responder em < 300 ms. Um cold start de Lambda com JVM pode levar 2–10 s — inaceitável para requisições de emergência. |
+| **Conexões de banco** | Funções serverless abrem e fecham conexões a cada invocação, esgotando rapidamente o pool do PostgreSQL. Exigiria RDS Proxy (latência extra + custo adicional). |
+| **Transações longas** | A alocação de bolsas é transacional (leitura + reserva em uma única transação ACID). O modelo stateless do serverless não se adapta bem a esse padrão. |
+| **Estado do agregado** | O agregado `Requisicao` precisa ser carregado, modificado e persistido atomicamente. Funções stateless não mantêm estado entre invocações. |
+
+O único contexto onde serverless se encaixaria é o de **Notificação**: disparar um e-mail ou SMS quando um evento chega (`AlertaTemperatura`, `RequisicaoAtendida`) é exatamente o padrão stateless que funções serverless resolvem bem, com custo próximo de zero em volumes baixos.
+
+Por isso, descartamos serverless para os contextos Core. Para Notificação, pode ser uma alternativa ao SaaS (SendGrid, Twilio) já previsto na projeção.
 
 ---
 

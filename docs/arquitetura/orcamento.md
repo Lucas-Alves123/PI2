@@ -26,12 +26,16 @@
 | **Data Transfer Out** | Transferência de dados (~10 GB/mês) | 1 | Primeiros 100 GB Free | $0.00 |
 | **Total Mensal AWS (Cenário 1)** | | | | **$24.57** |
 
+> **Fonte:** AWS Pricing Calculator (calculator.aws) · **Região:** us-east-1 (N. Virginia) · **Data:** 10/11/2026 · Preços on-demand.
+
 > **Custo por Pedido (AWS):** $24.57 ÷ 1.500 pedidos = **$0.0164 (aprox. 1,6 centavos de dólar por bolsa/pedido)**
 
 ### Alternativa em PaaS (Render)
 - Web Service Starter: $7.00/mês
 - PostgreSQL Starter (1 GB RAM / 10 GB SSD): $7.00/mês
 - **Total Render Cenário 1:** **$14.00/mês** ($0.0093 por pedido)
+
+> **Fonte:** Render Pricing (render.com/pricing) · **Data:** 10/11/2026 · Plano Starter.
 
 ---
 
@@ -46,6 +50,8 @@
 | **Armazenamento RDS** | General Purpose SSD (gp3) - 60 GB | 1 | $0.115/GB-mês | $6.90 |
 | **Data Transfer Out** | Transferência de dados (~50 GB/mês) | 1 | Free tier (<100 GB) | $0.00 |
 | **Total Mensal AWS (Cenário 2)** | | | | **$92.18** |
+
+> **Fonte:** AWS Pricing Calculator (calculator.aws) · **Região:** us-east-1 (N. Virginia) · **Data:** 10/11/2026 · Preços on-demand.
 
 > **Custo por Pedido (AWS):** $92.18 ÷ 15.000 pedidos = **$0.0061 (aprox. 0,6 centavos de dólar por pedido)**
 
@@ -64,6 +70,8 @@
 | **Armazenamento RDS** | General Purpose SSD (gp3) - 250 GB | 1 | $0.115/GB-mês | $28.75 |
 | **Data Transfer Out** | Transferência de dados (~250 GB/mês) | 1 | 150 GB cobrados ($0.09) | $13.50 |
 | **Total Mensal AWS (Cenário 3)** | | | | **$417.14** |
+
+> **Fonte:** AWS Pricing Calculator (calculator.aws) · **Região:** us-east-1 (N. Virginia) · **Data:** 10/11/2026 · Preços on-demand.
 
 > **Custo por Pedido (AWS):** $417.14 ÷ 150.000 pedidos = **$0.0027 (aprox. 0,27 centavos de dólar por pedido)**
 

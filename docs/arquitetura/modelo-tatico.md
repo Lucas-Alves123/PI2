@@ -143,6 +143,32 @@ A tabela abaixo é **sintética e deve ser validada por profissional habilitado*
 
 ---
 
+## Serviço de Domínio — `ServicoDeAlocacao`
+
+Algumas operações não pertencem naturalmente a uma entidade — especialmente quando envolvem regras que cruzam a fronteira entre dois agregados ou contextos. Nesses casos, DDD define o **Domain Service**.
+
+A lógica de **selecionar bolsas compatíveis e ordená-las por FEFO** não pertence à `Requisicao` (que não deve conhecer o repositório de bolsas) nem à entidade `Bolsa` (que não conhece a requisição). Ela pertence a um Serviço de Domínio.
+
+```java
+// Representação conceitual
+public class ServicoDeAlocacao {
+    private final BolsaRepository bolsaRepository;
+
+    public List<UUID> selecionarBolsas(
+            TipoSanguineo tipoSanguineo,
+            Componente componente,
+            int quantidade) {
+        // 1. Consulta bolsas com status DISPONIVEL e compatíveis com tipoSanguineo
+        // 2. Ordena por dataValidade ASC (FEFO — a que vence primeiro sai primeiro)
+        // 3. Retorna os primeiros `quantidade` bolsaIds para alocação
+    }
+}
+```
+
+Colocar essa lógica direto na `Requisicao` foi descartado: a raiz do agregado não deve depender de repositórios externos. Se o `BolsaRepository` fosse injetado na entidade, o isolamento do domínio quebraria. O `ServicoDeAlocacao` resolve isso: consulta o Estoque, aplica as regras (compatibilidade + FEFO) e devolve os `bolsaId`s para a `Requisicao` registrar as `Alocacao`s.
+
+---
+
 ## Invariantes do Agregado
 
 | # | Invariante | Onde é verificada |

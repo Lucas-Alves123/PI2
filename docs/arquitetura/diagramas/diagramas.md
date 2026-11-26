@@ -32,11 +32,11 @@ flowchart TD
     end
 
     HOSP -- "Fornecedor / ACL [hospitalId]" --> REQ
-    REQ <--> |"Cliente-Fornecedor (FEFO / Reserva)"| ALOC
-    ALOC -- "Consulta / Reserva com ACL" --> EST
-    REQ -- "Evento: RequisicaoAtendida" --> EXP
-    EXP <--> |"BolsaTransportada (Volume)"| EST
-    EXP -- "Dados de Rota" --> TEL
+    REQ -- "C/F: Req (↓) consome Aloc (↑)" --> ALOC
+    ALOC -- "C/F + ACL: Consulta e Reserva" --> EST
+    REQ -- "Pub/Sub: RequisicaoAtendida" --> EXP
+    EXP <--> |"BolsaTransportada (referência por id)"| EST
+    EXP -- "C/F: Dados de Guia e Rota" --> TEL
     
     TEL -- "Evento: AlertaTemperatura" --> NOTIF
     REQ -- "Evento: RequisicaoRegistrada" --> NOTIF
@@ -91,8 +91,31 @@ classDiagram
         +podeDoarPara(TipoSanguineo receptor, Componente comp) boolean
     }
 
+    class ServicoDeAlocacao {
+        <<Domain Service>>
+        +selecionarBolsas(TipoSanguineo, Componente, int) List~UUID~
+    }
+
+    class RequisicaoRegistrada {
+        <<Domain Event>>
+        +requisicaoId UUID
+        +hospitalId UUID
+        +tipoSanguineo TipoSanguineo
+        +criadaEm OffsetDateTime
+    }
+
+    class RequisicaoAtendida {
+        <<Domain Event>>
+        +requisicaoId UUID
+        +bolsasAlocadas List~UUID~
+        +ocorridoEm OffsetDateTime
+    }
+
     Requisicao "1" *-- "0..*" Alocacao : Contém
     Requisicao ..> TipoSanguineo : Usa
+    Requisicao ..> ServicoDeAlocacao : usa
+    Requisicao ..> RequisicaoRegistrada : publica
+    Requisicao ..> RequisicaoAtendida : publica
 ```
 
 ---
