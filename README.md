@@ -21,7 +21,7 @@ Todos os dados do repositório (hospitais, bolsas, motoristas, usuários e leitu
 
 ## Arquitetura
 
-O sistema foi construído como um monolito modular seguindo DDD e arquitetura em três camadas. O detalhamento de domínio, glossário, ADRs e cenários de carga está em [`docs/arquitetura/`](docs/arquitetura/), e a especificação funcional usada na implementação está em [`specs/requisicao/spec.md`](specs/requisicao/spec.md).
+O sistema foi construído como um monolito modular seguindo DDD e arquitetura em três camadas. O detalhamento de domínio, glossário, ADRs, cenários de carga e o plano de refatoração (com cobertura JaCoCo) está em [`docs/arquitetura/`](docs/arquitetura/) (ver [`plano-refatoracao.md`](docs/arquitetura/plano-refatoracao.md)), e a especificação funcional usada na implementação está em [`specs/requisicao/spec.md`](specs/requisicao/spec.md).
 
 ### Contextos (Bounded Contexts)
 
