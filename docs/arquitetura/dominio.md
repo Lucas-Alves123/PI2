@@ -18,7 +18,7 @@ O sistema permite que hospitais registrem solicitações de hemocomponentes, que
 
 ## Subdomínios
 
-O domínio do Rota Vital foi dividido em sete subdomínios, classificados em três categorias: Core, Suporte e Genérico.
+O domínio do Rota Vital foi dividido em **sete subdomínios**, classificados em três categorias: Core, Suporte e Genérico. Na implementação, esses sete subdomínios são expressos como **oito Bounded Contexts** — Requisição e Alocação são subdomínios conceitualmente unidos, mas implementados como contextos separados para preservar a coesão de cada responsabilidade.
 
 ### Core — Subdomínios que diferenciam o Rota Vital
 

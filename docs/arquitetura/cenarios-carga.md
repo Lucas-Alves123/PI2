@@ -218,43 +218,43 @@ L (total)      ≈ 18 requisições concorrentes
 
 ---
 
+## Análise de Sensibilidade — Variação do Tempo de Processamento (W)
+
+Os cálculos acima assumem W = 0,2 s (200 ms). Na prática, o tempo de processamento varia conforme a carga no banco, a presença de índices e a complexidade da query FEFO. A tabela abaixo mostra como L (concorrência) e as instâncias necessárias se comportam com diferentes valores de W:
+
+| W | Cenário 1 — λ = 2 req/s | Cenário 2 — λ = 15 req/s | Cenário 3 — λ = 80 req/s | Instâncias (C3) |
+|---|------------------------|--------------------------|--------------------------|-----------------|
+| 100 ms | L = 0,2 | L = 1,5 | L = 8 | 2 |
+| **200 ms (baseline)** | **L = 0,4** | **L = 3,4** | **L = 16** | **4** |
+| 400 ms | L = 0,8 | L = 7,0 | L = 32 | 8 |
+| 800 ms | L = 1,6 | L = 14,0 | L = 64 | 13–14 |
+
+> Se a query FEFO degradar de 200 ms para 400 ms — por falta de índice em `(status, data_validade)`, por exemplo — o Cenário 3 passa a exigir 8 instâncias em vez de 4, **dobrando o custo de infraestrutura**. Um índice bem colocado resolve; sem ele, o orçamento dobra.
+
+---
+
 ## Orçamento Estimado
 
-> ⚠️ **IMPORTANTE:** Os preços abaixo são estimativas baseadas em pesquisa de preços on-demand de provedores de nuvem. Preços mudam com frequência. Consulte sempre os calculadores oficiais antes de tomar decisões. Os valores estão em **dólar americano (USD)**, região **us-east-1 (AWS)** / **East US (Azure)**.
->
-> **Esta seção requer validação com preços atuais dos provedores.** A equipe deve acessar os calculadores oficiais e atualizar os valores com a data de consulta.
-
-### Calculadores oficiais
-- AWS Pricing Calculator: https://calculator.aws/pricing/2/home
-- Azure Pricing Calculator: https://azure.microsoft.com/pt-br/pricing/calculator/
-- Google Cloud Pricing Calculator: https://cloud.google.com/products/calculator
-- Render Pricing: https://render.com/pricing
-
-### Referência de Preços (a consultar e validar)
+> Os valores abaixo foram apurados no **AWS Pricing Calculator** em **10 de novembro de 2026**, região **us-east-1 (N. Virginia)**, modalidade **on-demand**. O detalhamento completo — componente a componente — está em [`orcamento.md`](orcamento.md) e na planilha `orcamento.xlsx`.
 
 | Serviço | Cenário 1 | Cenário 2 | Cenário 3 |
 |---------|-----------|-----------|-----------|
-| App (instâncias EC2/ECS) | t3.micro × 1 | t3.small × 2 | t3.medium × 4 |
-| Banco (RDS PostgreSQL) | db.t3.micro | db.t3.small | db.t3.medium + read replica |
+| App (ECS Fargate) | 1× 0,25 vCPU / 0,5 GB | 2× 0,5 vCPU / 1 GB | 4× Core + 2× Telemetria |
+| Banco (RDS PostgreSQL) | db.t3.micro (Single-AZ) | db.t3.small (Single-AZ) | db.t3.medium (Multi-AZ + Read Replica) |
 | Load Balancer | — | ALB | ALB |
-| Transferência de dados | Mínima | Moderada | Alta |
-| **Custo mensal estimado** | **~$20/mês** | **~$120/mês** | **~$500/mês** |
-| **Custo por pedido** | ~$0,013 | ~$0,008 | ~$0,003 |
+| **Custo mensal (AWS)** | **$24,57** | **$92,18** | **$417,14** |
+| **Custo por pedido** | $0,0164 | $0,0061 | $0,0027 |
 
-> **Nota:** Os valores acima são estimativas de referência com base em preços AWS on-demand de 2024/2025. A equipe deve consultar o AWS Pricing Calculator com as configurações exatas e registrar a data da consulta aqui.
->
-> **Data de consulta:** ___/___/2026 (a preencher pela equipe)  
-> **Fonte:** AWS Pricing Calculator — us-east-1  
-> **Observação:** Preços on-demand, sem reserva de instância. Com Reserved Instances (1 ano), o custo pode ser reduzido em ~30%.
+> **Observação:** Com Reserved Instances de 1 ano, os custos de ECS e RDS reduzem entre 28% e 38% em relação aos valores on-demand acima.
 
-### Alternativa PaaS — Render.com
+### Alternativa PaaS — Render.com (Cenários 1 e 2)
 
-Para o ambiente acadêmico (Cenário 1 e 2), o Render oferece:
-- **Plano gratuito:** 1 serviço web + 1 banco PostgreSQL (90 dias). Adequado para demo.
-- **Starter ($7/mês):** 1 serviço sempre ativo + banco PostgreSQL ($7/mês). Adequado para Cenário 1.
-- **Standard ($25/mês por serviço):** Adequado para Cenário 2 com 2 instâncias.
+| Plano | Custo | Adequado para |
+|-------|-------|---------------|
+| Starter | $7,00/mês (app) + $7,00/mês (banco) = **$14,00** | Cenário 1 — demo e operação regional |
+| Standard | $25,00/mês por serviço | Cenário 2 — 2 instâncias com banco dedicado |
 
-> Fonte: https://render.com/pricing (consultar para data atual)
+> O Cenário 3 exige infraestrutura dedicada (ECS + Multi-AZ + Read Replica) e não é coberto pelos planos Render.
 
 ---
 

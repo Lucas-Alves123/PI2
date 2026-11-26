@@ -1,6 +1,6 @@
 # ADR 0001: Decomposição do Rota Vital
 
-**Status:** Proposto  
+**Status:** Aceito  
 **Data:** Novembro de 2026  
 **Projeto:** Rota Vital · CESAR School · ADS · 2026.2
 
