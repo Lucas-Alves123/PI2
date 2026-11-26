@@ -10,7 +10,7 @@ CESAR School · Infraestrutura de Software · ADS · 2026.2
 | Gabriel Farias | - |
 | Gabriel Nogueira | - |
 | Lucas Mateus | [@Lucas-Alves123](https://github.com/Lucas-Alves123) |
-| Mirella Emily | - |
+| Mirella Emily | [@mihebs](https://github.com/mihebs) |
 | Myllena Cristiane | - |
 
 ## Sobre o projeto
