@@ -45,7 +45,7 @@
 | Componente / Recurso | Especificação | Qtd | Preço Unitário | Custo Mensal (USD) |
 | :--- | :--- | :---: | :---: | :---: |
 | **AWS ECS Fargate (Aplicação)** | 0.5 vCPU, 1 GB RAM (730h) | 2 | $0.0250/hora | $36.50 |
-| **AWS Application Load Balancer** | 1 ALB (~15 LCU consumidos) | 1 | $0.0225/hora + LCU | $22.50 |
+| **AWS Application Load Balancer** | 1 ALB ($0.0225/h × 730h = $16.43 fixo + $6.07 de LCU) | 1 | $0.0225/hora + LCU | $22.50 |
 | **AWS RDS PostgreSQL** | db.t3.small (Single-AZ, 2 vCPU, 2 GB) | 1 | $0.0360/hora | $26.28 |
 | **Armazenamento RDS** | General Purpose SSD (gp3) - 60 GB | 1 | $0.115/GB-mês | $6.90 |
 | **Data Transfer Out** | Transferência de dados (~50 GB/mês) | 1 | Free tier (<100 GB) | $0.00 |

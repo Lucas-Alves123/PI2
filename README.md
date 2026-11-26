@@ -27,9 +27,9 @@ O sistema foi construído como um monolito modular seguindo DDD e arquitetura em
 
 Cada contexto fica no seu próprio pacote dentro de `src/main/java/br/cesar/rotavital/` e conversa com os demais apenas pelos serviços da camada de aplicação ou por eventos de domínio (`ApplicationEventPublisher` e `@EventListener`), sem acessar repositórios de outro contexto:
 
-- `requisicao` (Core): registro de pedidos hospitalares, proteção das invariantes do agregado e alocação FEFO.
+- `requisicao` (Core): registro de pedidos hospitalares, proteção das invariantes do agregado e alocação FEFO (consolida os contextos conceituais de Requisição e Alocação de `dominio.md` no mesmo módulo para manter a transação do agregado).
 - `estoque` (Core): cadastro de bolsas, controle de validade, reserva e descarte.
-- `expedicao` (Suporte): emissão de guias de expedição, saída para transporte e confirmação de entrega.
+- `expedicao` (Core): emissão de guias de expedição, saída para transporte e confirmação de entrega.
 - `telemetria` (Suporte): registro de temperatura durante o transporte (faixa de 2 °C a 6 °C) e geração de alertas.
 - `hospitais` (Suporte): cadastro e consulta de hospitais e unidades solicitantes.
 - `notificacao` (Genérico): avisos internos gerados a partir dos eventos de domínio.

@@ -163,9 +163,13 @@ L (total)      ≈ 18 requisições concorrentes
 ```
 
 **Instâncias necessárias:**  
-- Aplicação: 4 instâncias (16 req concorrentes / ~4 req por instância com margem)  
-- Telemetria: 2 instâncias separadas (justificativa para extração como microsserviço)  
-**Conexões com banco:** 15 por instância × 4 instâncias = 60 conexões (app) + 15 × 2 = 30 (telemetria) = 90 conexões totais.
+- Aplicação: 4 instâncias (para atender à disponibilidade de 99,9% com redundância N+2 e margem de folga para picos de 2× a 3× sobre L = 16, mantendo cada instância bem abaixo do limite de saturação de CPU/threads).  
+- Telemetria: 2 instâncias separadas (justificativa para extração como microsserviço).  
+**Conexões com banco (derivadas de L):**  
+- Fórmula adotada: `pool por instância = max(5, ceil((L / instâncias) × fator de segurança 3))`.  
+- Cenário 1: `max(5, ceil(0,4 × 3)) = 5` conexões (1 instância = 5 conexões totais).  
+- Cenário 2: `max(10, ceil((3,4 / 2) × 3)) = 10` conexões por instância (2 instâncias = 20 conexões totais).  
+- Cenário 3: `max(15, ceil((16 / 4) × 3)) = 15` conexões por instância Core (`4 × 15 = 60`) + `15 × 2 = 30` nas instâncias de telemetria = **90 conexões totais**.
 
 ### Diagrama — Cenário 3
 
@@ -222,12 +226,14 @@ L (total)      ≈ 18 requisições concorrentes
 
 Os cálculos acima assumem W = 0,2 s (200 ms). Na prática, o tempo de processamento varia conforme a carga no banco, a presença de índices e a complexidade da query FEFO. A tabela abaixo mostra como L (concorrência) e as instâncias necessárias se comportam com diferentes valores de W:
 
-| W | Cenário 1 — λ = 2 req/s | Cenário 2 — λ = 15 req/s | Cenário 3 — λ = 80 req/s | Instâncias (C3) |
-|---|------------------------|--------------------------|--------------------------|-----------------|
-| 100 ms | L = 0,2 | L = 1,5 | L = 8 | 2 |
-| **200 ms (baseline)** | **L = 0,4** | **L = 3,4** | **L = 16** | **4** |
-| 400 ms | L = 0,8 | L = 7,0 | L = 32 | 8 |
-| 800 ms | L = 1,6 | L = 14,0 | L = 64 | 13–14 |
+| W | Cenário 1 — λ = 2 req/s | Cenário 2 — λ = 15 req/s | Cenário 3 — λ = 80 req/s | Instâncias Core (C3) |
+|---|------------------------|--------------------------|--------------------------|----------------------|
+| 100 ms | L = 0,2 | L = 1,5 | L = 8,0 | 2 |
+| **200 ms (baseline)** | **L = 0,4** | **L = 3,0** | **L = 16,0** | **4** |
+| 400 ms | L = 0,8 | L = 6,0 | L = 32,0 | 8 |
+| 800 ms | L = 1,6 | L = 12,0 | L = 64,0 | 14 |
+
+> *Nota:* A tabela acima considera apenas a carga da aplicação principal (λ = 2, 15 e 80 req/s). Somando a telemetria no baseline (200 ms), o L total é 0,42 (C1), 3,4 (C2) e 17,5 ≈ 18 (C3), conforme a tabela-resumo anterior.
 
 > Se a query FEFO degradar de 200 ms para 400 ms — por falta de índice em `(status, data_validade)`, por exemplo — o Cenário 3 passa a exigir 8 instâncias em vez de 4, **dobrando o custo de infraestrutura**. Um índice bem colocado resolve; sem ele, o orçamento dobra.
 

@@ -29,7 +29,7 @@ Consideramos duas alternativas:
 
 Adotamos o **monolito modular** como arquitetura inicial, com separação clara de módulos por Bounded Context (hospitais, estoque, requisição, expedição, telemetria, notificação, identidade).
 
-Os módulos seguem a mesma separação de responsabilidades que teriam como microsserviços — domain, application, infrastructure — mas rodam no mesmo processo.
+Os módulos seguem a mesma separação de responsabilidades que teriam como microsserviços — `apresentacao`, `negocio` (`aplicacao` e `dominio`) e `dados` — mas rodam no mesmo processo.
 
 ---
 
