@@ -140,10 +140,10 @@ INSERT INTO veiculo (placa, modelo) VALUES
 ('QRS-4F56', 'VW Delivery Refrigerado');
 
 INSERT INTO usuario (login, senha_hash, nome, email, perfil) VALUES
-('admin',    '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Administrador',            'admin@rotavital.local',     'ADMINISTRADOR'),
-('estoque1', '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Ana Silva - Estoque',      'estoque@rotavital.local',   'ESTOQUE'),
-('atend1',   '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Bruno Lima - Atendimento', 'atend@rotavital.local',     'ATENDIMENTO'),
-('exped1',   '$2a$12$N3zHRE9Q4L8KoSrGhFlBx.T0wh1xFX9Yde4sQ6Dm7pCDj6gWwxEHm', 'Carla Mota - Expedição',   'expedicao@rotavital.local', 'EXPEDICAO');
+('admin',    '$2a$10$vV7hhSEOl/3MpjLTLW6qeuakUCF2lYHODRlkT.Phn7SWn6mWf.6HO', 'Administrador',            'admin@rotavital.local',     'ADMINISTRADOR'),
+('estoque1', '$2a$10$vV7hhSEOl/3MpjLTLW6qeuakUCF2lYHODRlkT.Phn7SWn6mWf.6HO', 'Ana Silva - Estoque',      'estoque@rotavital.local',   'ESTOQUE'),
+('atend1',   '$2a$10$vV7hhSEOl/3MpjLTLW6qeuakUCF2lYHODRlkT.Phn7SWn6mWf.6HO', 'Bruno Lima - Atendimento', 'atend@rotavital.local',     'ATENDIMENTO'),
+('exped1',   '$2a$10$vV7hhSEOl/3MpjLTLW6qeuakUCF2lYHODRlkT.Phn7SWn6mWf.6HO', 'Carla Mota - Expedição',   'expedicao@rotavital.local', 'EXPEDICAO');
 
 INSERT INTO bolsa (codigo, abo, rh, componente, data_coleta, data_validade, localizacao, status) VALUES
 ('RV-2026-00001', 'O',  'NEGATIVO',  'CH',   '2026-11-10', '2026-12-18', 'Prateleira A1', 'DISPONIVEL'),
